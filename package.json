@@ -1,0 +1,16 @@
+{
+  "name": "stackline",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "An esoteric language combining stack operations and cellular automatons, inspired by Wireworld and ORCA.",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "node test/all.js"
+  },
+  "author": "Adrien Burgun (Shad Amethyst)",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^5.0.0",
+    "supports-ansi": "^1.0.6"
+  }
+}
