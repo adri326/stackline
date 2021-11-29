@@ -59,8 +59,8 @@ To install and run this software, you will need [`git`](https://git-scm.com/down
 Clone this repository, then navigate into it:
 
 ```sh
-git clone https://github.com/adri326/stackline-lang
-cd stackline-lang
+git clone https://github.com/adri326/stackline
+cd stackline
 ```
 
 Then, install the required dependencies using `npm`:
