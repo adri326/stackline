@@ -16,10 +16,14 @@ FUNCTIONS.set("p", (signal, x, y, grid) => {
         }
         signal.push(str);
         return offset + 1;
-    } else if (/^[0-9]$/.exec(grid.getChar(x + 1, y))) {
+    } else if (/^[0-9\-\.]$/.exec(grid.getChar(x + 1, y))) {
         let str = "";
         let offset = 1;
-        while (/^[0-9]$/.exec(grid.getChar(x + offset, y))) {
+        if (grid.getChar(x + 1, y) == "-") {
+            str = "-";
+            offset = 2;
+        }
+        while (/^[0-9\.]$/.exec(grid.getChar(x + offset, y))) {
             str += grid.getChar(x + offset, y);
             offset += 1;
         }
@@ -158,6 +162,12 @@ FUNCTIONS.set("%", (signal) => {
     let right = signal.pop();
     let left = signal.pop();
     signal.push(left % right);
+});
+
+/// Computes the square root of the last value of the stack:
+/// `[9]` -> `[3]`
+FUNCTIONS.set("√", (signal) => {
+    signal.push(Math.sqrt(signal.pop()));
 });
 
 /// Swaps the last two elements from the stack:

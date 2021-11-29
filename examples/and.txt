@@ -1,0 +1,34 @@
+ ===      Complete and gate:
+!>-v
+ ^-+#-------?#-fv   >p5        Synchronization gate:
+    :Rdp0.2< :o +o»-^:
+                o c  :              !>----+--v
+                x-+--p3              |    |  |
+                o c  :               |    | o»‽---p4
+!>-v            +o»-v:               ^----< ^     :
+ ^-+#-------?#-f^   +p5                     +p4
+    :Rdp0.2< :o     |:                !>+-#-^:
+ kkk                |:                 ^< :pR
+ +++-.             .<
+
+
+               Simplified versions:
+
+And gate, top only:      And gate, bottom only:
+
+!#----+                        !#----c
+ :p0  o                         :p0  o
+      x-----p                        x-----p
+      o     :                        o     :
+!#----c     :                  !#----+     :
+ :p1                            :p1
+
+              And gate, both sides:
+
+              !#-----+o»-----p
+               :p0   o |     :
+                     xc+     :
+                     o |
+              !#-----+o»-----p
+               :p1           :
+                             :

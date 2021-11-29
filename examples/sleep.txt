@@ -1,0 +1,16 @@
+    Wakes up after a while:
+
+v-#!
+| :
+| :p"Wake up"
+o»-----------p
+ |           :
+ ^-------------------!
+
+    Wakes up after a random amount of time:
+
+!>+-#------?f---v !
+ ^< :Rp0.2<    v«o#
+               |  :p"Sleepers of the dark"
+               p
+               :

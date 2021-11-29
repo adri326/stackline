@@ -60,4 +60,3 @@ process.on("SIGINT", () => {
 if (supportsAnsi) process.stdout.write("\x1b[?25l");
 print();
 loop();
-

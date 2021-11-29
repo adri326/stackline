@@ -209,9 +209,9 @@ CHARS.set("p", (x, y, grid, new_grid) => {
 
         let str;
         if (precision && Number.isFinite(signal[n])) {
-            str = signal[n].toPrecision(precision);
+            str = signal[signal.length - n - 1].toPrecision(precision);
         } else {
-            str = signal[n].toString();
+            str = signal[signal.length - n - 1].toString();
         }
 
         for (let c = 0; c < str.length; c++) {
@@ -246,6 +246,46 @@ CHARS.set("?", (x, y, grid, new_grid) => {
 CHARS.set("¿", (x, y, grid, new_grid) => {
     let signal = grid.getSignal(x, y) ?? [];
     let truthy = !!signal[signal.length - 1];
+
+    if (grid.getPower(x - 1, y) == 2 || grid.getPower(x + 1, y) == 2) {
+        if (truthy) {
+            CHARS.get("|")(x, y, grid, new_grid);
+        } else {
+            CHARS.get("-")(x, y, grid, new_grid);
+        }
+    } else {
+        if (truthy) {
+            CHARS.get("-")(x, y, grid, new_grid);
+        } else {
+            CHARS.get("|")(x, y, grid, new_grid);
+        }
+    }
+});
+
+/// "if empty" statement, similar to "?", but only lets a signal through if it has a non-empty stack
+CHARS.set("‽", (x, y, grid, new_grid) => {
+    let signal = grid.getSignal(x, y) ?? [];
+    let truthy = signal.length > 0;
+
+    if (grid.getPower(x - 1, y) == 2 || grid.getPower(x + 1, y) == 2) {
+        if (truthy) {
+            CHARS.get("-")(x, y, grid, new_grid);
+        } else {
+            CHARS.get("|")(x, y, grid, new_grid);
+        }
+    } else {
+        if (truthy) {
+            CHARS.get("|")(x, y, grid, new_grid);
+        } else {
+            CHARS.get("-")(x, y, grid, new_grid);
+        }
+    }
+});
+
+/// "if not empty" statement, inverted variant of "‽"
+CHARS.set("⸘", (x, y, grid, new_grid) => {
+    let signal = grid.getSignal(x, y) ?? [];
+    let truthy = signal.length > 0;
 
     if (grid.getPower(x - 1, y) == 2 || grid.getPower(x + 1, y) == 2) {
         if (truthy) {
@@ -320,4 +360,173 @@ CHARS.set(".", (x, y, grid, new_grid) => {
         }
         new_grid.removeSignal(x, y);
     }
+});
+
+CHARS.set("\"", (x, y, grid, new_grid) => {
+    let signalBelow = grid.getSignal(x, y + 1);
+    new_grid.moveSignal(x, y, x, y + 1);
+    if (signalBelow) {
+        new_grid.newSignal(x, y, signalBelow);
+        return CHARS.get("-")(x, y, grid, new_grid);
+    } else {
+        new_grid.setChar(x, y + 1, "o");
+        new_grid.setPower(x, y + 1, 3);
+    }
+});
+
+CHARS.set("o", (x, y, grid, new_grid) => {
+    new_grid.setPower(x, y, 3);
+
+    if (grid.hasChar(x - 1, y) && grid.getPower(x - 1, y) == 0) {
+        new_grid.setPower(x - 1, y);
+        new_grid.copySignal(x, y, x - 1, y);
+    }
+    if (grid.hasChar(x + 1, y) && grid.getPower(x + 1, y) == 0) {
+        new_grid.setPower(x + 1, y);
+        new_grid.copySignal(x, y, x + 1, y);
+    }
+    if (grid.hasChar(x, y - 1) && grid.getPower(x, y - 1) == 0) {
+        new_grid.setPower(x, y - 1);
+        new_grid.copySignal(x, y, x, y - 1);
+    }
+    if (grid.hasChar(x, y + 1) && grid.getPower(x, y + 1) == 0) {
+        new_grid.setPower(x, y + 1);
+        new_grid.copySignal(x, y, x, y + 1);
+    }
+
+    return false;
+});
+
+CHARS.set("x", (x, y, grid, new_grid) => {
+    let signalAbove = grid.getSignal(x, y - 1);
+    let signalBelow = grid.getSignal(x, y + 1);
+
+    if (signalAbove && signalBelow) {
+        new_grid.removeSignal(x, y - 1);
+        new_grid.removeSignal(x, y + 1);
+
+        // Construct signal
+        let signal = [];
+        signalAbove.reverse();
+        signalBelow.reverse();
+
+        let n = 0;
+        for (; n < signalAbove.length && n < signalBelow.length; n++) {
+            signal.push(signalAbove[n]);
+            signal.push(signalBelow[n]);
+        }
+        for (; n < signalAbove.length; n++) signal.push(signalAbove[n]);
+        for (; n < signalBelow.length; n++) signal.push(signalBelow[n]);
+        signal.reverse();
+
+        new_grid.newSignal(x, y, signal);
+        new_grid.setPower(x, y - 1, 2);
+        new_grid.setPower(x, y + 1, 2);
+        return CHARS.get("-")(x, y, grid, new_grid);
+    } else {
+        if (signalAbove && grid.getPower(x, y - 1) == 2) new_grid.setPower(x, y - 1, 3);
+        if (signalBelow && grid.getPower(x, y + 1) == 2) new_grid.setPower(x, y + 1, 3);
+
+        new_grid.setPower(x, y, 0);
+        return false;
+    }
+});
+
+CHARS.set("»", (x, y, grid, new_grid) => {
+    if (
+        grid.getPower(x, y - 1) == 2
+        || grid.getPower(x, y + 1) == 2
+    ) {
+        let signal = grid.getSignal(x, y) ?? [];
+        let signalLeft = grid.getSignal(x - 1, y) ?? [];
+
+        signal = signal.concat(signalLeft);
+        new_grid.removeSignal(x - 1, y);
+        new_grid.removeSignal(x, y);
+        if (new_grid.getPower(x - 1, y) == 3) new_grid.setPower(x - 1, y, 2);
+
+        if (grid.getPower(x + 1, y) != 2) {
+            new_grid.setPower(x + 1, y, 1);
+            new_grid.newSignal(x + 1, y, signal);
+        }
+    } else {
+        new_grid.setPower(x, y, 0);
+        return false;
+    }
+});
+
+CHARS.set("«", (x, y, grid, new_grid) => {
+    if (
+        grid.getPower(x, y - 1) == 2
+        || grid.getPower(x, y + 1) == 2
+    ) {
+        let signal = grid.getSignal(x, y) ?? [];
+        let signalRight = grid.getSignal(x + 1, y) ?? [];
+
+        signal = signal.concat(signalRight);
+        new_grid.removeSignal(x + 1, y);
+        new_grid.removeSignal(x, y);
+        if (new_grid.getPower(x + 1, y) == 3) new_grid.setPower(x + 1, y, 2);
+
+        if (grid.getPower(x - 1, y) != 2) {
+            new_grid.setPower(x - 1, y, 1);
+            new_grid.newSignal(x - 1, y, signal);
+        }
+    } else {
+        new_grid.setPower(x, y, 0);
+        return false;
+    }
+});
+
+/// Only lets through the first signal
+CHARS.set("f", (x, y, grid, new_grid) => {
+    new_grid.setPower(x, y, 3);
+
+    CHARS.get("+")(x, y, grid, new_grid);
+
+    return false;
+});
+
+CHARS.set("k", (x, y, grid, new_grid) => {
+    if (grid.hasChar(x - 1, y) && grid.getPower(x - 1, y) == 2) {
+        for (let n = 2; x + n < grid.width; n++) {
+            if (grid.hasChar(x + n, y)) {
+                if (grid.getChar(x + n, y) == "=") break;
+                new_grid.setPower(x + n, y, 2);
+            }
+        }
+    }
+
+    if (grid.hasChar(x + 1, y) && grid.getPower(x + 1, y) == 2) {
+        for (let n = 2; x - n >= 0; n++) {
+            if (grid.hasChar(x - n, y)) {
+                if (grid.getChar(x - n, y) == "=") break;
+                new_grid.setPower(x - n, y, 2);
+            }
+        }
+    }
+
+    if (grid.hasChar(x, y - 1) && grid.getPower(x, y - 1) == 2) {
+        for (let n = 2; y + n < grid.height; n++) {
+            if (grid.hasChar(x, y + n)) {
+                if (grid.getChar(x, y + n) == "=") break;
+                new_grid.setPower(x, y + n, 2);
+            }
+        }
+    }
+
+    if (grid.hasChar(x, y + 1) && grid.getPower(x, y + 1) == 2) {
+        for (let n = 2; y - n >= 0; n++) {
+            if (grid.hasChar(x, y - n)) {
+                if (grid.getChar(x, y - n) == "=") break;
+                new_grid.setPower(x, y - n, 2);
+            }
+        }
+    }
+});
+
+CHARS.set("c", (x, y, grid, new_grid) => {
+    new_grid.newSignal(x, y, []);
+
+    CHARS.get("+")(x, y, grid, new_grid);
 });
