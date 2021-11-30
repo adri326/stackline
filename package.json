@@ -1,6 +1,6 @@
 {
   "name": "stackline",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "type": "module",
   "description": "An esoteric language combining stack operations and cellular automatons, inspired by Wireworld and ORCA.",
   "main": "src/index.js",

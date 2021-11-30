@@ -1,5 +1,7 @@
 "use strict";
 
+import Signal from "./signal.js";
+
 export const REGION_SIZE = 4;
 
 function newTable(width, height, fill) {
@@ -219,7 +221,7 @@ export class Grid {
             );
         }
 
-        this._signals.set(`${dx},${dy}`, [...signal]);
+        this._signals.set(`${dx},${dy}`, new Signal(signal));
     }
 
     /// Moves the signal from [sx, sy] to [dx, dy]

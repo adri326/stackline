@@ -62,9 +62,9 @@ export function withNumericalInput(x, y, grid, callback) {
 FUNCTIONS.set("d", (signal, x, y, grid) => {
     return withNumericalInput(x, y, grid, (str) => {
         if (str) {
-            signal.push(signal[signal.length - +str - 1]);
+            signal.push(signal.peek(+str));
         } else {
-            signal.push(signal[signal.length - 1]);
+            signal.push(signal.peek());
         }
     });
 });
@@ -139,13 +139,24 @@ FUNCTIONS.set("-", (signal) => {
     signal.push(left - right);
 });
 
-// TODO: string product
 /// Calculates the product of the last two values of the stack:
 /// `[1, 2, 3]` -> `[1, 6]`; `[1, 3, -5]` -> `[1, -15]`
+///
+/// If the left operand is a string and the right operand is a number,
+/// then the `left` is repeated `right` times and pushed back onto the stack.
+/// If `right` isn't an integer, then `left` is simply pushed back onto the stack.
 FUNCTIONS.set("*", (signal) => {
     let right = signal.pop();
     let left = signal.pop();
-    signal.push(left * right);
+    if (typeof left === "string" && typeof right === "number") {
+        if (Number.isInteger(right)) {
+            signal.push(left.repeat(right));
+        } else {
+            signal.push(left);
+        }
+    } else {
+        signal.push(left * right);
+    }
 });
 
 /// Calculates the division between the last two values of the stack:
@@ -158,10 +169,17 @@ FUNCTIONS.set("/", (signal) => {
 
 /// Calculates the remainder between the last two values of the stack:
 /// `[7, 3]` -> `[1]`
+///
+/// If the left operand is a string and the right operand is a number,
+/// then the `right`-th character from `left` is pushed back on the stack instead.
 FUNCTIONS.set("%", (signal) => {
     let right = signal.pop();
     let left = signal.pop();
-    signal.push(left % right);
+    if (typeof left === "string" && typeof right === "number") {
+        signal.push(left[right]);
+    } else {
+        signal.push(left % right);
+    }
 });
 
 /// Computes the square root of the last value of the stack:
@@ -217,4 +235,44 @@ FUNCTIONS.set("=", (signal) => {
     let right = signal.pop();
     let left = signal.pop();
     signal.push(left === right ? 1 : 0);
+});
+
+/// Pops a value and writes to the heap; if it is given a numerical argument, then the corresponding variable will be written to.
+/// Otherwise, a value is popped from the stack and the variable corresponding to it will be written to.
+/// For example, `→` alone would do the following: `[4, 0]` -> `[] {0 => 4}`.
+/// `→1` would do the following: `[4, 0]` -> `[4] {1 => 0}`
+// TODO: handle string parameters
+FUNCTIONS.set("→", (signal, x, y, grid) => {
+    return withNumericalInput(x, y, grid, (str) => {
+        let addr;
+        if (str) {
+            addr = +str;
+        } else {
+            addr = signal.pop();
+        }
+        signal.set(addr, signal.pop());
+    });
+});
+
+/// Reads from the heap and pushes the read value on the stack; if it is given a numberical argument, then the corresponding variable will be read.
+/// Otherwise, a value is popped from the stack and used as variable address.
+/// If the variable does not exist, does nothing.
+/// For example, `←` alone would do the following: `[0] {0 => 4}` -> `[4] {0 => 4}`.
+/// `←1` would do the following: `[] {1 => 0}` -> `[0]`.
+// TODO: handle string parameters
+FUNCTIONS.set("←", (signal, x, y, grid) => {
+    return withNumericalInput(x, y, grid, (str) => {
+        let addr;
+        if (str) {
+            addr = +str;
+        } else {
+            addr = signal.pop();
+        }
+        signal.push(signal.get(addr);
+    });
+});
+
+/// Pushes to the stack the current length of the stack
+FUNCTIONS.set("l", (signal) => {
+    signal.push(signal.length);
 });

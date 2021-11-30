@@ -1,6 +1,7 @@
 "use strict";
 
 import FUNCTIONS from "./functions.js";
+import Signal from "./signal.js";
 
 const CHARS = new Map();
 export default CHARS;
@@ -98,7 +99,7 @@ CHARS.set("v", (x, y, grid, new_grid) => {
 
 
 CHARS.set("!", (x, y, grid, new_grid) => {
-    let signal = [];
+    let signal = new Signal();
     new_grid.setPower(x - 1, y);
     new_grid.setPower(x + 1, y);
     new_grid.setPower(x, y - 1);
@@ -190,7 +191,7 @@ CHARS.set(":", (x, y, grid, new_grid) => {
 
 // Debug print, use with caution!
 CHARS.set("p", (x, y, grid, new_grid) => {
-    let signal = grid.getSignal(x, y) ?? [];
+    let signal = grid.getSignal(x, y) ?? new Signal();
     let precision = null;
 
     if (/[0-9]/.exec(grid.getChar(x + 1, y))) {
@@ -209,9 +210,9 @@ CHARS.set("p", (x, y, grid, new_grid) => {
 
         let str;
         if (precision && Number.isFinite(signal[n])) {
-            str = signal[signal.length - n - 1].toPrecision(precision);
+            str = signal.peek(n).toPrecision(precision);
         } else {
-            str = signal[signal.length - n - 1].toString();
+            str = signal.peek(n).toString();
         }
 
         for (let c = 0; c < str.length; c++) {
@@ -224,8 +225,8 @@ CHARS.set("p", (x, y, grid, new_grid) => {
 /// "if" statement: outputs a signal in the same direction iff the top value is truthy,
 /// otherwise outputs on the orthogonal sides
 CHARS.set("?", (x, y, grid, new_grid) => {
-    let signal = grid.getSignal(x, y) ?? [];
-    let truthy = !!signal[signal.length - 1];
+    let signal = grid.getSignal(x, y) ?? new Signal();
+    let truthy = !!signal.peek();
 
     if (grid.getPower(x - 1, y) == 2 || grid.getPower(x + 1, y) == 2) {
         if (truthy) {
@@ -244,8 +245,8 @@ CHARS.set("?", (x, y, grid, new_grid) => {
 
 /// Inverted "if" statement
 CHARS.set("¿", (x, y, grid, new_grid) => {
-    let signal = grid.getSignal(x, y) ?? [];
-    let truthy = !!signal[signal.length - 1];
+    let signal = grid.getSignal(x, y) ?? new Signal();
+    let truthy = !!signal.peek();
 
     if (grid.getPower(x - 1, y) == 2 || grid.getPower(x + 1, y) == 2) {
         if (truthy) {
@@ -264,7 +265,7 @@ CHARS.set("¿", (x, y, grid, new_grid) => {
 
 /// "if empty" statement, similar to "?", but only lets a signal through if it has a non-empty stack
 CHARS.set("‽", (x, y, grid, new_grid) => {
-    let signal = grid.getSignal(x, y) ?? [];
+    let signal = grid.getSignal(x, y) ?? new Signal();
     let truthy = signal.length > 0;
 
     if (grid.getPower(x - 1, y) == 2 || grid.getPower(x + 1, y) == 2) {
@@ -284,7 +285,7 @@ CHARS.set("‽", (x, y, grid, new_grid) => {
 
 /// "if not empty" statement, inverted variant of "‽"
 CHARS.set("⸘", (x, y, grid, new_grid) => {
-    let signal = grid.getSignal(x, y) ?? [];
+    let signal = grid.getSignal(x, y) ?? new Signal();
     let truthy = signal.length > 0;
 
     if (grid.getPower(x - 1, y) == 2 || grid.getPower(x + 1, y) == 2) {
@@ -406,17 +407,15 @@ CHARS.set("x", (x, y, grid, new_grid) => {
         new_grid.removeSignal(x, y + 1);
 
         // Construct signal
-        let signal = [];
-        signalAbove.reverse();
-        signalBelow.reverse();
+        let signal = new Signal();
 
         let n = 0;
         for (; n < signalAbove.length && n < signalBelow.length; n++) {
-            signal.push(signalAbove[n]);
-            signal.push(signalBelow[n]);
+            signal.push(signalAbove.peek(n));
+            signal.push(signalBelow.peek(n));
         }
-        for (; n < signalAbove.length; n++) signal.push(signalAbove[n]);
-        for (; n < signalBelow.length; n++) signal.push(signalBelow[n]);
+        for (; n < signalAbove.length; n++) signal.push(signalAbove.peek(n));
+        for (; n < signalBelow.length; n++) signal.push(signalBelow.peek(n));
         signal.reverse();
 
         new_grid.newSignal(x, y, signal);
@@ -437,8 +436,8 @@ CHARS.set("»", (x, y, grid, new_grid) => {
         grid.getPower(x, y - 1) == 2
         || grid.getPower(x, y + 1) == 2
     ) {
-        let signal = grid.getSignal(x, y) ?? [];
-        let signalLeft = grid.getSignal(x - 1, y) ?? [];
+        let signal = grid.getSignal(x, y) ?? new Signal();
+        let signalLeft = grid.getSignal(x - 1, y) ?? new Signal();
 
         signal = signal.concat(signalLeft);
         new_grid.removeSignal(x - 1, y);
@@ -460,8 +459,8 @@ CHARS.set("«", (x, y, grid, new_grid) => {
         grid.getPower(x, y - 1) == 2
         || grid.getPower(x, y + 1) == 2
     ) {
-        let signal = grid.getSignal(x, y) ?? [];
-        let signalRight = grid.getSignal(x + 1, y) ?? [];
+        let signal = grid.getSignal(x, y) ?? new Signal();
+        let signalRight = grid.getSignal(x + 1, y) ?? new Signal();
 
         signal = signal.concat(signalRight);
         new_grid.removeSignal(x + 1, y);
@@ -487,9 +486,11 @@ CHARS.set("f", (x, y, grid, new_grid) => {
     return false;
 });
 
+/// Kills any signal in the direction opposing the incomming signal: does so by setting all cells to resting until it reaches a wall (`=`).
+/// Can be used to reset or turn off a circuit.
 CHARS.set("k", (x, y, grid, new_grid) => {
     if (grid.hasChar(x - 1, y) && grid.getPower(x - 1, y) == 2) {
-        for (let n = 2; x + n < grid.width; n++) {
+        for (let n = 1; x + n < grid.width; n++) {
             if (grid.hasChar(x + n, y)) {
                 if (grid.getChar(x + n, y) == "=") break;
                 new_grid.setPower(x + n, y, 2);
@@ -498,7 +499,7 @@ CHARS.set("k", (x, y, grid, new_grid) => {
     }
 
     if (grid.hasChar(x + 1, y) && grid.getPower(x + 1, y) == 2) {
-        for (let n = 2; x - n >= 0; n++) {
+        for (let n = 1; x - n >= 0; n++) {
             if (grid.hasChar(x - n, y)) {
                 if (grid.getChar(x - n, y) == "=") break;
                 new_grid.setPower(x - n, y, 2);
@@ -507,7 +508,7 @@ CHARS.set("k", (x, y, grid, new_grid) => {
     }
 
     if (grid.hasChar(x, y - 1) && grid.getPower(x, y - 1) == 2) {
-        for (let n = 2; y + n < grid.height; n++) {
+        for (let n = 1; y + n < grid.height; n++) {
             if (grid.hasChar(x, y + n)) {
                 if (grid.getChar(x, y + n) == "=") break;
                 new_grid.setPower(x, y + n, 2);
@@ -516,7 +517,7 @@ CHARS.set("k", (x, y, grid, new_grid) => {
     }
 
     if (grid.hasChar(x, y + 1) && grid.getPower(x, y + 1) == 2) {
-        for (let n = 2; y - n >= 0; n++) {
+        for (let n = 1; y - n >= 0; n++) {
             if (grid.hasChar(x, y - n)) {
                 if (grid.getChar(x, y - n) == "=") break;
                 new_grid.setPower(x, y - n, 2);
@@ -525,8 +526,22 @@ CHARS.set("k", (x, y, grid, new_grid) => {
     }
 });
 
+/// Completely clears the signal
 CHARS.set("c", (x, y, grid, new_grid) => {
-    new_grid.newSignal(x, y, []);
+    new_grid.newSignal(x, y, new Signal());
+
+    CHARS.get("+")(x, y, grid, new_grid);
+});
+
+/// Clears the stack of the signal but leaves the heap untouched
+CHARS.set("c", (x, y, grid, new_grid) => {
+    let signal = grid.getSignal(x, y);
+
+    if (signal) {
+        signal.stack = [];
+    }
+
+    new_grid.newSignal(x, y, signal);
 
     CHARS.get("+")(x, y, grid, new_grid);
 });
