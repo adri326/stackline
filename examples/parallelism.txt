@@ -1,0 +1,21 @@
+    >--------------------------------v           X, Y ~> U([0; 1])
+    |                                |           P(X²+Y²≤1²) = π/4
+    |     >#-----------o             |           ⇒ 4*Σ(X²+Y²≤1)/n → π
+    |   >-|:Rd*Rd*+p1≤ x-#--v        | p-------<
+    |   | >#-----------o :+ o        | :       +-#---------p
+    | >-+  :Rd*Rd*+p1≤      x-#--v   o :       | :s√p1.5s/ :
+    | | | >#-----------o    o :+ |   x-#-------+-#---------p
+    | | >-|:Rd*Rd*+p1≤ x-#--^    |   o :+sp8+s v :s/p4*    :
+!   | |   >#-----------o :+      o   |         .
+#-->+-c    :Rd*Rd*+p1≤           x-#-^           Computes an approximation of PI, using
+:p0 ^ |   >#-----------o         o :+            a parallelized circuit. The top value is
+:p0 | | >-|:Rd*Rd*+p1≤ x-#--v    |               an approximate error value, while the
+    | | | >#-----------o :+ o    |               bottom value is the computed value of PI.
+    | >-+  :Rd*Rd*+p1≤      x-#--^
+    |   | >#-----------o    o :+                 This algorithm converges sub-linearly,
+    |   >-|:Rd*Rd*+p1≤ x-#--^                    so you will need to run it for a while for
+    |     >#-----------o :+                      it to reach a good approximation.
+    |      :Rd*Rd*+p1≤                         .
+    |                                          | The circuit merges the result from several
+    ^-.                                      .-< tests using the "x" gate, see the "and"
+                                                 example for more information.

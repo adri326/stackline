@@ -5,6 +5,8 @@ An esoteric language inspired by [Wireworld](https://mathworld.wolfram.com/WireW
 It operates with packets of data sent across wires.
 These packets are handled with a stack-based language.
 
+![examples/parallelism.txt, rendered with the CLI interface](examples/parallelism.gif)
+
 ## How it works
 
 The world is divided into a grid of cells: each cell has a state (an integer) and a "char" (a Unicode codepoint).

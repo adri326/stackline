@@ -9,20 +9,48 @@ import {step, activeGrid} from "./simulation.js"
 let grid_a = Grid.fromString(process.argv[2] ? fs.readFileSync(process.argv[2], "utf8") : "");
 let grid_b = grid_a.clone();
 
+let colorActive = chalk.hex("#90FFFF");
+let colorAsleep = chalk.hex("#707070");
+let colorResting = chalk.hex("#262626");
+let colorIdle = chalk.hex("#5030F3")
+
 function print() {
     let grid = activeGrid ? grid_a : grid_b;
 
     for (const [y, row] of grid._chars.entries()) {
+        let lastPower = 0;
+        let str = "";
         for (const [x, char] of row.entries()) {
+            if (char == " ") {
+                str += " ";
+                continue;
+            }
             let power = grid.getPower(x, y);
-            if (power == 1) {
-                process.stdout.write(chalk.yellow(char));
-            } else if (power == 2) {
-                process.stdout.write(chalk.black(char));
-            } else if (power == 3) {
-                process.stdout.write(chalk.red(char));
+            if (power != lastPower) {
+                if (lastPower == 1) {
+                    process.stdout.write(colorActive(str));
+                } else if (lastPower == 2) {
+                    process.stdout.write(colorResting(str));
+                } else if (lastPower == 3) {
+                    process.stdout.write(colorIdle(str));
+                } else {
+                    process.stdout.write(colorAsleep(str));
+                }
+                str = char;
             } else {
-                process.stdout.write(chalk.gray(char));
+                str += char;
+            }
+            lastPower = power;
+        }
+        if (str !== "") {
+            if (lastPower == 1) {
+                process.stdout.write(colorActive(str));
+            } else if (lastPower == 2) {
+                process.stdout.write(colorResting(str));
+            } else if (lastPower == 3) {
+                process.stdout.write(colorIdle(str));
+            } else {
+                process.stdout.write(colorAsleep(str));
             }
         }
         process.stdout.write("\n");
@@ -33,7 +61,7 @@ function clear() {
     if (supportsAnsi) process.stdout.write("\x1b[" + grid_a.height + "A\x1b[1G");
 }
 
-const DT = 1000/10;
+const DT = 1000/30;
 
 let stepCount = 0;
 let nextUpdate = performance.now() + DT;
