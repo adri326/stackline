@@ -58,7 +58,7 @@ CHARS.set("+", (x, y, grid, new_grid) => {
 // Diodes, which force a signal onto the next char
 
 CHARS.set(">", (x, y, grid, new_grid) => {
-    if (grid.getPower(x + 1, y) != 2) {
+    if (grid.getPower(x + 1, y) == 0) {
         new_grid.setPower(x + 1, y);
         new_grid.moveSignal(x, y, x + 1, y);
     } else {
@@ -68,7 +68,7 @@ CHARS.set(">", (x, y, grid, new_grid) => {
 });
 
 CHARS.set("<", (x, y, grid, new_grid) => {
-    if (grid.getPower(x - 1, y) != 2) {
+    if (grid.getPower(x - 1, y) == 0) {
         new_grid.setPower(x - 1, y);
         new_grid.moveSignal(x, y, x - 1, y);
     } else {
@@ -78,7 +78,7 @@ CHARS.set("<", (x, y, grid, new_grid) => {
 });
 
 CHARS.set("^", (x, y, grid, new_grid) => {
-    if (grid.getPower(x, y - 1) != 2) {
+    if (grid.getPower(x, y - 1) == 0) {
         new_grid.setPower(x, y - 1);
         new_grid.moveSignal(x, y, x, y - 1);
     } else {
@@ -88,6 +88,16 @@ CHARS.set("^", (x, y, grid, new_grid) => {
 });
 
 CHARS.set("v", (x, y, grid, new_grid) => {
+    if (grid.getPower(x, y + 1) == 0) {
+        new_grid.setPower(x, y + 1);
+        new_grid.moveSignal(x, y, x, y + 1);
+    } else {
+        new_grid.removeSignal(x, y);
+    }
+    return true;
+});
+
+CHARS.set("V", (x, y, grid, new_grid) => {
     if (grid.getPower(x, y + 1) != 2) {
         new_grid.setPower(x, y + 1);
         new_grid.moveSignal(x, y, x, y + 1);
@@ -204,15 +214,17 @@ CHARS.set("p", (x, y, grid, new_grid) => {
         precision = Math.max(Math.min(+str, 100), 1);
     }
 
-    for (let n = 0; n < signal.length; n++) {
+    for (let n = 0; n < signal.length + 1; n++) {
         if (grid.getChar(x, y + n + 1) != ":") break;
         new_grid.setPower(x, y + n + 1, 2);
 
         let str;
-        if (precision && Number.isFinite(signal[n])) {
-            str = signal.peek(n).toPrecision(precision);
+        if (precision && Number.isFinite(signal.peek(n))) {
+            str = (signal.peek(n) ?? "").toPrecision(precision) + " ";
+        } else if (signal.peek(n) !== undefined) {
+            str = (signal.peek(n) ?? "").toString() + " ";
         } else {
-            str = signal.peek(n).toString();
+            str = " ";
         }
 
         for (let c = 0; c < str.length; c++) {
@@ -404,7 +416,6 @@ CHARS.set("x", (x, y, grid, new_grid) => {
 
     if (signalAbove && signalBelow) {
         new_grid.removeSignal(x, y - 1);
-        new_grid.removeSignal(x, y + 1);
 
         // Construct signal
         let signal = new Signal();
@@ -416,6 +427,7 @@ CHARS.set("x", (x, y, grid, new_grid) => {
         }
         for (; n < signalAbove.length; n++) signal.push(signalAbove.peek(n));
         for (; n < signalBelow.length; n++) signal.push(signalBelow.peek(n));
+        signal.variables = signalBelow.variables;
         signal.reverse();
 
         new_grid.newSignal(x, y, signal);
@@ -462,8 +474,7 @@ CHARS.set("«", (x, y, grid, new_grid) => {
         let signal = grid.getSignal(x, y) ?? new Signal();
         let signalRight = grid.getSignal(x + 1, y) ?? new Signal();
 
-        signal = signal.concat(signalRight);
-        new_grid.removeSignal(x + 1, y);
+        signal = signalRight.concat(signal);
         new_grid.removeSignal(x, y);
         if (new_grid.getPower(x + 1, y) == 3) new_grid.setPower(x + 1, y, 2);
 
@@ -539,9 +550,20 @@ CHARS.set("C", (x, y, grid, new_grid) => {
 
     if (signal) {
         signal.stack = [];
+        new_grid.newSignal(x, y, signal);
     }
 
-    new_grid.newSignal(x, y, signal);
+    CHARS.get("+")(x, y, grid, new_grid);
+});
+
+/// Clears the heap of the signal but leaves the stack untouched
+CHARS.set("D", (x, y, grid, new_grid) => {
+    let signal = grid.getSignal(x, y);
+
+    if (signal) {
+        signal.heap = new Map();
+        new_grid.newSignal(x, y, signal);
+    }
 
     CHARS.get("+")(x, y, grid, new_grid);
 });

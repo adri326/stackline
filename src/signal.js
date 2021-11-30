@@ -48,13 +48,15 @@ export class Signal {
     }
 
     concat(...signals) {
-        this.stack.concat(signals.map(signal => signal.stack));
+        this.stack = this.stack.concat(...signals.map(signal => signal.stack));
 
         for (let signal of signals) {
-            for (let [key, value] of signal.heap) {
-                this.heap.set(key, value);
+            for (let [key, value] of signal.variables) {
+                this.variables.set(key, value);
             }
         }
+
+        return this;
     }
 
     reverse() {

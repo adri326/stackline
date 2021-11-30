@@ -2,8 +2,10 @@
 
 An esoteric language inspired by [Wireworld](https://mathworld.wolfram.com/WireWorld.html) and [ORCA](https://github.com/hundredrabbits/Orca).
 
-It operates with packets of data sent across wires.
-These packets are handled with a stack-based language.
+- It operates with packets of data sent across wires.
+- These packets are handled with a stack-based language.
+- It is Turing-complete ([it can interpret Brainfuck, for instance](./examples/brainfuck.txt)), but it tries not to be too deep of a [tarpit](https://esolangs.org/wiki/Turing_tarpit).
+- Loops and conditions can be visually expressed, variables are accessible from within the stack-based language.
 
 ![examples/parallelism.txt, rendered with the CLI interface](examples/parallelism.gif)
 

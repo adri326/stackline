@@ -61,7 +61,8 @@ function clear() {
     if (supportsAnsi) process.stdout.write("\x1b[" + grid_a.height + "A\x1b[1G");
 }
 
-const DT = 1000/30;
+const DT = 1000/60;
+const ITERATIONS_PER_FRAME = 1; // Increase this if you want to run the "brainfuck" example
 
 let stepCount = 0;
 let nextUpdate = performance.now() + DT;
@@ -69,7 +70,9 @@ let sum = 0;
 function loop() {
     stepCount += 1;
     let start = performance.now();
-    step(grid_a, grid_b);
+    for (let n = 0; n < ITERATIONS_PER_FRAME; n++) {
+        step(grid_a, grid_b);
+    }
     sum += performance.now() - start;
     clear();
     print();
@@ -80,6 +83,7 @@ function loop() {
 
 process.on("SIGINT", () => {
     if (supportsAnsi) process.stdout.write("\x1b[?25h");
+    // console.log(grid_a._signals);
     console.log("Average performance: " + (sum / stepCount) + " ms/t");
     process.exit(0);
 });

@@ -268,7 +268,10 @@ FUNCTIONS.set("←", (signal, x, y, grid) => {
         } else {
             addr = signal.pop();
         }
-        signal.push(signal.get(addr));
+        let value = signal.get(addr);
+        if (value !== undefined) {
+            signal.push(value);
+        }
     });
 });
 
