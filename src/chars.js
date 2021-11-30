@@ -534,7 +534,7 @@ CHARS.set("c", (x, y, grid, new_grid) => {
 });
 
 /// Clears the stack of the signal but leaves the heap untouched
-CHARS.set("c", (x, y, grid, new_grid) => {
+CHARS.set("C", (x, y, grid, new_grid) => {
     let signal = grid.getSignal(x, y);
 
     if (signal) {
