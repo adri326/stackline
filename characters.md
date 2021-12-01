@@ -134,7 +134,7 @@ Overcoming the halting problem :)
 
 ### Conditions
 
-These conditional cells are meant to be used together with the [condition instructions](#conditions-2).
+These conditional cells are meant to be used together with the [comparison instructions](#comparisons).
 A [truthy value](https://developer.mozilla.org/en-US/docs/Glossary/Truthy) is a value that aren't falsy.
 Empty strings, `±0` and `null` are all falsy.
 An empty stack is considered to have a falsy top value.
