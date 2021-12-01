@@ -9,8 +9,8 @@ import {step, activeGrid} from "./simulation.js"
 let grid_a = Grid.fromString(process.argv[2] ? fs.readFileSync(process.argv[2], "utf8") : "");
 let grid_b = grid_a.clone();
 
-const DT = 1000/60;
-const ITERATIONS_PER_FRAME = 1000; // Increase this if you want to run the "brainfuck" example
+const DT = 1000/30;
+const ITERATIONS_PER_FRAME = 1; // Increase this if you want to run the "brainfuck" example
 const CAN_STOP = true;
 
 const colorActive = chalk.hex("#90FFFF");

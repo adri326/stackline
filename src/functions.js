@@ -186,7 +186,12 @@ FUNCTIONS.set("%", (signal) => {
 /// Computes the square root of the last value of the stack:
 /// `[9]` -> `[3]`
 FUNCTIONS.set("√", (signal) => {
-    signal.push(Math.sqrt(signal.pop()));
+    let value = signal.pop();
+    if (typeof value === "string") {
+        signal.push(value.length);
+    } else {
+        signal.push(Math.sqrt(value));
+    }
 });
 
 /// Swaps the last two elements from the stack:
@@ -230,12 +235,20 @@ FUNCTIONS.set("≥", (signal) => {
     signal.push(left >= right ? 1 : 0);
 });
 
-/// Compares the last two elements from the stack. Pushes `1` if `a == b`, `0` otherwise:
+/// Compares the last two elements from the stack. Pushes `1` if `a === b`, `0` otherwise:
 /// `[2.0, 3.0]` -> `[0]`; `[3.0, 2.0]` -> `[0]`; `[4.0, 4.0]` -> `[1]`
 FUNCTIONS.set("=", (signal) => {
     let right = signal.pop();
     let left = signal.pop();
     signal.push(left === right ? 1 : 0);
+});
+
+/// Compares the last two elements from the stack. Pushes `1` if `a !== b`, `0` otherwise:
+/// `[2.0, 3.0]` -> `[1]`; `[3.0, 2.0]` -> `[1]`; `[4.0, 4.0]` -> `[0]`
+FUNCTIONS.set("≠", (signal) => {
+    let right = signal.pop();
+    let left = signal.pop();
+    signal.push(left !== right ? 1 : 0);
 });
 
 /// Pops a value and writes to the heap; if it is given a numerical argument, then the corresponding variable will be written to.

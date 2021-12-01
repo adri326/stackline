@@ -69,7 +69,7 @@ that can duplicate signals.
 | `!` | Bang | Produces an empty signal and transmits it to any cell orthogonally adjacent to it, then destroys itself. *Passive* |
 | `#` | Hold | Sends the signal down and waits, by settings itself to state `3` (idle), and any horizontally adjacent cell that has state `2` (resting) to state `3`. Once it is reactivated (if the bottom cell has a state of `2` or one of the horizontally adjacent cells has state `3`), unlocks adjacent cells and sends the result signal horizontally. |
 | `:` | Execute | Executes the [instructions](#instructions) to its right with the current signal, then sends down the altered signal and becomes state `3` (idle) if the character below it is a `:`. Otherwise, sends the signal up until it finds a non-`:` character, setting every `:` (including itself) to state `2` (resting). *Also used by `p`* |
-| `p` | Debug print | Prints the first few elements of the stack into the simulation. Does not check whether or not it will write over important pieces of circuitry, so use at your own risk! Only prints to the right of `:` that are placed right below it. |
+| `p` | Debug print | Prints the first few elements of the stack into the simulation. Does not check whether or not it will write over important pieces of circuitry, so use at your own risk! Only prints to the right of `:` that are placed right below it. Can be followed by a number that specifies the precision of the numerical values. |
 | `.` | Tunnel | Sends the signal to the next `.` in the same direction as it came. Upon receival, acts like a `+`. |
 | `H` | Halt | Stops the simulation, can be disabled in the simulation settings. |
 
@@ -411,8 +411,179 @@ Fills the stack with 10 zeroes.
 | `*` | Multiply | Pops two values, then multiplies them and pushes the result. If the left operand is a string and the right operand a number, then the string is repeated `right` times. |
 | `/` | Divide | Pops two values, then divides them and pushes the result. |
 | `%` | Modulo | Pops two values, then computes the modulo between them and pushes the result. If the left operand is a string and the right operand a number, then pushes back the `right`-th character from `left` instead. |
-| `√` | Square root | Pops a value and pushes back the square root of that value. |
+| `√` | Square root | Pops a value and pushes back the square root of that value. For strings, pushes the length of the string. |
 | `f` | Floor | Pops a number and floors it. If a number is specified after `f`, then floors to the nearest multiple of that value. |
 | `c` | Ceil | Pops a number and ceils it. If a number is specified after `c`, then ceils to the nearest multiple of that value. |
 | `r` | Round | Pops a number and rounds it. If a number is specified after `r`, then rounds to the nearest multiple of that value. |
 | `R` | Random | Pushes a random number between 0 and 1. If a number is specified after `R`, then pushes a random number between 0 and that value. |
+
+**Examples:**
+
+```
+               >-#-----p
+!              | :p2*  :
+#---v-+---v  >-+-#-----p
+:p1 >#^   |  | | :p3*  :
+     :p1+ |  | >-#-----p
+          >--+   :p4*  :
+             | >-#-----p
+             | | :p5*  :
+             >-+-#-----p
+               | :p6*  :
+               >-#-----p
+                 :p7*  :
+
+A small multiplication table (that only goes up to 7).
+```
+
+```
+!#-----p
+ :R10f :
+
+Generates a random integer between 0 and 9.
+```
+
+```
+v-+--#-------?#--p4
+| |  :R2p1-   :o :
+>-^! :R2p1-      :
+     :d1d*d1d*+p1<
+
+Generates uniform random points on a disk of radius 1, using rejection sampling.
+```
+
+```
+  >----------------o
+v-+                x-+-#------p
+| |<#--!-#-------->o<# :d1√%% :
+>#^ :p0  :p"Hello"   :o
+ :p1+
+
+Prints the letters of "Hello" one by one.
+```
+
+### Comparisons
+
+Boolean values are encoded as integers: a non-zero value will be considered truthy by the conditional characters, but all of the comparison operators will either return 0 or 1.
+
+| Character | Name | Description |
+| :-------: | :--- | :---------- |
+| `<` | Less than | Pops two values, pushes 1 if `left < right`, pushes 0 otherwise. |
+| `>` | Greater than | Pops two values, pushes 1 if `left > right`, pushes 0 otherwise. |
+| `≤` | Less than | Pops two values, pushes 1 if `left <= right`, pushes 0 otherwise. |
+| `≥` | Less than | Pops two values, pushes 1 if `left >= right`, pushes 0 otherwise. |
+| `=` | Equal | Pops two values, pushes 1 if `left === right`, pushes 0 otherwise. |
+| `≠` | Not equal | Pops two values, pushes 1 if `left !== right`, pushes 0 otherwise. |
+
+**Examples:**
+
+```
+!#------------+#--p
+ :p"Baba"     |:= :
+ :p"Keke"     +#--p
+              |:≠ :
+              +#--p
+              |:< :
+              +#--p
+              |:> :
+              +#--p
+              |:≤ :
+              +#--p
+              |:≥ :
+
+Expected output is 0,1,1,0,1,0
+```
+
+```
+!#------#--?->-p
+ :p"23" :≠ | | :
+ :p23      >#^
+            :p"Assertion error"
+
+A string cannot be equal to a number.
+```
+
+### Variable read/write
+
+Each signal is equipped with both a stack (an array with operations on the topmost values) and a heap (a number -> value Map).
+The notation `{key1 => value1, key2 => value2, ...}` will be used to represent the heap of a signal.
+
+| Character | Name | Description |
+| :-------: | :--- | :---------- |
+| `←` (left arrow, `U+2190`) | Variable read | If a number is specified after `←`, then reads the variable pointed to at that address. Otherwise, pops a number and reads the variable pointed to at that address. If the variable does not exist, does nothing. |
+| `→` (right arrow, `U2192`) | Variable write | If a number is specified after `→`, then pops a value and writes it to the address pointed to by that number. Otherwise, pops the address and the value to write to the variable and performs the write. |
+
+**Variable read:**
+
+Consider the following circuit:
+
+```
+A → >----#-----p
+         :←N   :
+                ^ R
+```
+
+`←` will read from the heap of signal `A`. Its behavior will vary based on `N` and (if `N` is empty), the top value of `A`'s stack:
+
+| A (stack) | A (heap) | N | R (stack) |
+| --------: | :------- |---|---|
+| `[]` | `{0 => "A"}` | `0` | `[0]` |
+| `[0]` | `{0 => "A"}` | empty | `[0]` |
+| `[0]` | `{0 => "A", 1 => -17}` | `1` | `[0, -17]` |
+| `[1]` | `{0 => "A", 1 => -17}` | empty | `[-17]` |
+| `[0]` | `{0 => "A", 1 => -17}` | `3` | `[0]` |
+| `[3]` | `{0 => "A", 1 => -17}` | empty | `[]` |
+
+**Variable write:**
+
+Now, consider the following circuit:
+
+```
+A → >----#----- → R
+         :→N
+```
+
+`→` will write to the heap of signal `A` and its behavior will, like the previous circuit, depend on `N` and the top value of `A`'s stack:
+
+| A (stack) | A (heap) | N | R (stack) | R (heap) |
+| --------: | :------- |---| --------: | :------- |
+| `[3]` | `{}` | `0` | `[]` | `{0 => 3}` |
+| `[3, 0]` | `{}` | empty | `[]` | `{0 => 3}` |
+| `[3]` | `{0 => -1}` | `0` | `[]` | `{0 => 3}` |
+| `[3, 0]` | `{0 => -1}` | empty | `[]` | `{0 => 3}` |
+| `[127, 3]` | `{0 => -1}` | `1` | `[127]` | `{0 => -1, 1 => 3}` |
+| `[127, 3, 1]` | `{0 => -1}` | empty | `[127]` | `{0 => -1, 1 => 3}` |
+
+**Examples:**
+
+Because `←` will do nothing if the variable pointed to doesn't exist, we can use `‽` to filter signals according to the result:
+
+```
+!#-----v-+---#-‽-p
+ :p1→1 >#^   :←  :
+ :p3→2  :p1+
+ :p2→5
+ :p0
+
+This circuit prints "1", "3" and "2" (after a short delay),
+before looping indefinitely.
+```
+
+More complex data structures can be encoded onto the heap.
+The following circuit does the same as `*(list + n)` in C:
+
+```
+!#-------+#--->--#-----‽-p
+ :p1→0   |:p0 |  :←0+    :
+ :p13→1  |    |  :←
+ :p27→2  +#---^
+ :p-9→3  |:p1 |
+         |    |
+         >#---^
+          :p2
+
+This circuit prints "13", "27" and "-9" in succession. Our list is stored statically,
+beginning at address 1 and ending at address 3. The first half, `←0+`, gets the
+base address of the list and adds it with the value on top of the stack. Finally,
+`←` reads the variable at the computed address.
+```
