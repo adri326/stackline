@@ -190,3 +190,163 @@ Produces a random value and checks that it is less than 0.5; if not, loops
 back and produces a new random number. The "o" instruction is required here
 to get rid of the value used by the "¿".
 ```
+
+```
+>--C#---‽---p
+    :←0     :
+
+Because the "←" instruction does not push anything on the stack if there
+is no variable stored at the indicated location, we can make conditionals
+based on the existence of variables.
+```
+
+### Signal manipulators
+
+| Character | Name | Description |
+| :-------: | :--- | :---------- |
+| `"` | Buffer | When first powered, spawns a `o` below it and stores the signal in it. Later, it transmits the signal stored in the `o` and stores the received signal instead. |
+| `o` | Storage | Stores a signal; when powered, turns into state `3` (idle) and triggers the cells orthogonally adjacent to it. *Can be reset with `k`* |
+| `f` | Fuse | Only lets a signal through once: it then turns into state `3`. *Can be reset with `k`* |
+| `c` | Clear | Clears a signal, transmitting a brand new signal instead. |
+| `C` (uppercase) | Clear stack | Clears the stack from a signal, transmitting a new signal with an empty stack but preserving the heap. |
+| `D` (uppercase) | Clear heap | Clears the heap from a signal, transmitting a new signal with an empty heap but preserving the stack. |
+| `k` | Kill | When receiving a signal, sets every cell in the same direction as the signal to state `2` (resting), until it either reaches the end of the network or a wall (`=`). |
+
+**Examples:**
+
+```
+!#--->-"----p
+ :p0 |      :
+     |
+     |
+!#---^
+ :p1
+
+The first signal to go through the " cell will be [0]; it will then be stored.
+Next, the signal with [1] will go through the " cell: it will be stored, while
+the previous [0] signal will be sent along the wire. This means that at the
+end, the network looks like the following:
+
+ #--->-"----p
+ :p0 | o    :0
+     |
+     | ^ [1] is stored in here
+ #---^
+ :p1
+```
+
+```
+>---+-C-#---⸘#---v
+    |   :←0 |:p0 |
+    |       >----v
+    |            |
+    >-----------o»---
+
+Here the signal if forked with "+": the bottom branch is stored in a "o",
+while the top branch gets its stack cleared. We then read from the heap: if
+the variable at 0 was present, then the signal is directed down. Otherwise,
+the value "0" is pushed on the stack. When "»" is triggered, it will concatenate
+both stacks.
+```
+
+```
+ ==
+!>+-----+
+ ^<     |
+        |
+ kk     |
+ ++-----<
+
+This example showcases a simple 4-tick clock, that is wired to a kill switch.
+As soon as the kill switch is triggered, the clock will be turned off.
+```
+
+### Join operations
+
+| Character | Name | Description |
+| :-------: | :--- | :---------- |
+| `x` | Merger | Waits until both the top and bottom cells have a state of `3` (idle): if that happens, then the stack of both signals are merged and the heap from the bottom signal is written over the heap from the top signal. The signal is then transmitted horizontally. |
+| `»` (`U+00BB`) | Extract right | If the left cell has a state of `3` (idle), then appends the current signal to it and send it right. |
+| `«` (`U+00AB`) | Extract left | If the left cell has a state of `3` (idle), then appends it to the current signal and send it right. |
+
+**Note on the way data is merged:**
+These join operators have to merge data at some point. There are two bits of data to combine: the stack and the heap.
+
+**"Merging"** (as done by `x`) will read from the stack of both signals in a round-robin fashion.
+For instance, given the following circuit:
+
+```
+A → >-o
+      x-- → R
+B → >-o
+```
+
+We get the following results (remember that stack manipulations are done from right to left):
+
+| A (stack) | B (stack) | **R (stack)** |
+| :-------: | :-------: | :------------ |
+| `[]` | `[]` | `[]` |
+| `[1]` | `[2]` | `[1, 2]` |
+| `[3, 1]` | `[4, 2]` | `[4, 3, 2, 1]` |
+| `[]` | `[1, -1]` | `[1, -1]` |
+| `[0]` | `[1, -1]` | `[1, -1, 0]` (A is read first) |
+| `[1, -1]` | `[0]` | `[1, 0, -1]` (B is only read after A) |
+| `[5, 4, 3, 2, 1]` | `[0]` | `[5, 4, 3, 2, 0, 1]` |
+
+In this example, the heap of B is written over the heap of A:
+
+```
+A = {0 => 134, 1 => -67}
+B = {1 => 36,  2 => 0}
+R = {0 => 134, 1 => 36, 2 => 0}
+```
+
+**"Appending"** takes all of the values from one stack and puts it at the top of another stack.
+
+```
+        ↓ B            A ↓
+
+        v                v
+        |                |
+A → >--o»--- → R  R ← ---«o--< ← B
+```
+
+The table for these two circuits is the same and is simpler to understand:
+
+| A (stack) | B (stack) | **R (stack)** |
+| :-------: | :-------: | :------------ |
+| `[]` | `[]` | `[]` |
+| `[1]` | `[2]` | `[1, 2]` |
+| `[1, -1]` | `[0, 4]` | `[1, -1, 0, 4]` |
+| `[0]` | `[1, -1]` | `[0, 1, -1]` |
+
+The heap is manipulated in the same way as with `x`, with `B` being written over `A` in both cases.
+The difference between the two circuits is that:
+
+- `»` stores `A` and waits for `B`
+- `«` stores `B` and waits for `A`
+
+**Examples:**
+
+```
+--+-v  >--p
+  f |  |  :
+  co»v |  :
+   ^-+-^  :
+          :
+          :
+
+This circuit implements memory, where each incoming signal is appended
+to the stored value and the stored value is then updated.
+```
+
+```
+>-C-#--‽o
+    :←0 x---p
+>-C-#--‽o   :
+    :←1     :
+
+Waits for two signals and makes sure that the variables from 0 and 1 are
+read. Here the circuit will print the value of variable 0 on top and
+of variable 1 on the bottom line.
+```

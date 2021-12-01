@@ -9,10 +9,13 @@ import {step, activeGrid} from "./simulation.js"
 let grid_a = Grid.fromString(process.argv[2] ? fs.readFileSync(process.argv[2], "utf8") : "");
 let grid_b = grid_a.clone();
 
-let colorActive = chalk.hex("#90FFFF");
-let colorAsleep = chalk.hex("#707070");
-let colorResting = chalk.hex("#262626");
-let colorIdle = chalk.hex("#5030F3")
+const DT = 1000/60;
+const ITERATIONS_PER_FRAME = 1000; // Increase this if you want to run the "brainfuck" example
+
+const colorActive = chalk.hex("#90FFFF");
+const colorAsleep = chalk.hex("#707070");
+const colorResting = chalk.hex("#262626");
+const colorIdle = chalk.hex("#5030F3")
 
 function print() {
     let grid = activeGrid ? grid_a : grid_b;
@@ -61,9 +64,6 @@ function clear() {
     if (supportsAnsi) process.stdout.write("\x1b[" + grid_a.height + "A\x1b[1G");
 }
 
-const DT = 1000/60;
-const ITERATIONS_PER_FRAME = 1; // Increase this if you want to run the "brainfuck" example
-
 let stepCount = 0;
 let nextUpdate = performance.now() + DT;
 let sum = 0;
@@ -84,7 +84,11 @@ function loop() {
 process.on("SIGINT", () => {
     if (supportsAnsi) process.stdout.write("\x1b[?25h");
     // console.log(grid_a._signals);
-    console.log("Average performance: " + (sum / stepCount) + " ms/t");
+    console.log(
+        "Average performance: "
+        + (sum / stepCount / ITERATIONS_PER_FRAME * 1000)
+        + " μs/t"
+    );
     process.exit(0);
 });
 
