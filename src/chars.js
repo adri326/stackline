@@ -567,3 +567,8 @@ CHARS.set("D", (x, y, grid, new_grid) => {
 
     CHARS.get("+")(x, y, grid, new_grid);
 });
+
+/// Stops the simulation if the canStop parameter was set
+CHARS.set("H", (x, y, grid, new_grid) => {
+    new_grid.stop();
+});

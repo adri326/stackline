@@ -14,8 +14,9 @@ function power_char(char, x, y, grid, newGrid) {
 }
 
 export let activeGrid = false;
-/// Progresses the simulation by one step
-export function step(grid_a, grid_b) {
+
+/// Progresses the simulation by one step; returns true if the simulation requested to stop
+export function step(grid_a, grid_b, canStop = false) {
     let grid = activeGrid ? grid_a : grid_b;
     let newGrid = activeGrid ? grid_b : grid_a;
     activeGrid = !activeGrid;
@@ -48,6 +49,12 @@ export function step(grid_a, grid_b) {
 
     // Pass 3: Copy newGrid into grid
     newGrid.copyData(grid);
+
+    if (newGrid.shouldStop && canStop) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 export default step;

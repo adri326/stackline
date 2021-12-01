@@ -23,6 +23,7 @@ export class Grid {
     constructor(width, height) {
         this.width = width;
         this.height = height;
+        this.shouldStop = false;
         this._chars = newTable(this.width, this.height, " ");
         this._power = newTable(this.width, this.height, 0);
         this._signals = new Map();
@@ -283,6 +284,10 @@ export class Grid {
                 }
             }
         }
+    }
+
+    stop() {
+        this.shouldStop = true;
     }
 
     /// Parses a string into a grid

@@ -172,11 +172,12 @@ FUNCTIONS.set("/", (signal) => {
 ///
 /// If the left operand is a string and the right operand is a number,
 /// then the `right`-th character from `left` is pushed back on the stack instead.
+/// If it doesn't exist, `""` is pushed on the stack.
 FUNCTIONS.set("%", (signal) => {
     let right = signal.pop();
     let left = signal.pop();
     if (typeof left === "string" && typeof right === "number") {
-        signal.push(left[right]);
+        signal.push(left[right] ?? "");
     } else {
         signal.push(left % right);
     }

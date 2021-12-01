@@ -71,6 +71,7 @@ that can duplicate signals.
 | `:` | Execute | Executes the [instructions](#instructions) to its right with the current signal, then sends down the altered signal and becomes state `3` (idle) if the character below it is a `:`. Otherwise, sends the signal up until it finds a non-`:` character, setting every `:` (including itself) to state `2` (resting). *Also used by `p`* |
 | `p` | Debug print | Prints the first few elements of the stack into the simulation. Does not check whether or not it will write over important pieces of circuitry, so use at your own risk! Only prints to the right of `:` that are placed right below it. |
 | `.` | Tunnel | Sends the signal to the next `.` in the same direction as it came. Upon receival, acts like a `+`. |
+| `H` | Halt | Stops the simulation, can be disabled in the simulation settings. |
 
 `#` and `:` are meant to be used together in almost every scenario.
 The way `#` works requires it to be woken from its idle state (`3`), which the common cables and diodes won't do.
@@ -122,6 +123,13 @@ A simple counter, starting at 1. Has a period of 12, but can be made more compac
        |
     .  >--
     >----
+```
+
+```
+!>+-#-------?H
+ ^< :Rp0.01<
+
+Overcoming the halting problem :)
 ```
 
 ### Conditions
@@ -266,8 +274,8 @@ As soon as the kill switch is triggered, the clock will be turned off.
 | Character | Name | Description |
 | :-------: | :--- | :---------- |
 | `x` | Merger | Waits until both the top and bottom cells have a state of `3` (idle): if that happens, then the stack of both signals are merged and the heap from the bottom signal is written over the heap from the top signal. The signal is then transmitted horizontally. |
-| `»` (`U+00BB`) | Extract right | If the left cell has a state of `3` (idle), then appends the current signal to it and send it right. |
-| `«` (`U+00AB`) | Extract left | If the left cell has a state of `3` (idle), then appends it to the current signal and send it right. |
+| `»` (`U+00BB`) | Extract right | If the left cell has a state of `3` (idle), then appends the current signal to it and sends it right. |
+| `«` (`U+00AB`) | Extract left | If the right cell has a state of `3` (idle), then appends it to the current signal and sends it left. |
 
 **Note on the way data is merged:**
 These join operators have to merge data at some point. There are two bits of data to combine: the stack and the heap.

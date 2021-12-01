@@ -11,6 +11,7 @@ let grid_b = grid_a.clone();
 
 const DT = 1000/60;
 const ITERATIONS_PER_FRAME = 1000; // Increase this if you want to run the "brainfuck" example
+const CAN_STOP = true;
 
 const colorActive = chalk.hex("#90FFFF");
 const colorAsleep = chalk.hex("#707070");
@@ -64,6 +65,18 @@ function clear() {
     if (supportsAnsi) process.stdout.write("\x1b[" + grid_a.height + "A\x1b[1G");
 }
 
+function stop() {
+    clear();
+    print();
+
+    if (supportsAnsi) process.stdout.write("\x1b[?25h");
+    console.log(
+        "Average performance: "
+        + (sum / stepCount / ITERATIONS_PER_FRAME * 1000)
+        + " μs/t"
+    );
+}
+
 let stepCount = 0;
 let nextUpdate = performance.now() + DT;
 let sum = 0;
@@ -71,7 +84,9 @@ function loop() {
     stepCount += 1;
     let start = performance.now();
     for (let n = 0; n < ITERATIONS_PER_FRAME; n++) {
-        step(grid_a, grid_b);
+        if (step(grid_a, grid_b, CAN_STOP)) {
+            return stop();
+        }
     }
     sum += performance.now() - start;
     clear();
@@ -82,13 +97,7 @@ function loop() {
 }
 
 process.on("SIGINT", () => {
-    if (supportsAnsi) process.stdout.write("\x1b[?25h");
-    // console.log(grid_a._signals);
-    console.log(
-        "Average performance: "
-        + (sum / stepCount / ITERATIONS_PER_FRAME * 1000)
-        + " μs/t"
-    );
+    stop();
     process.exit(0);
 });
 
