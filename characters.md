@@ -294,7 +294,7 @@ We get the following results (remember that stack manipulations are done from ri
 | A (stack) | B (stack) | **R (stack)** |
 | :-------: | :-------: | :------------ |
 | `[]` | `[]` | `[]` |
-| `[1]` | `[2]` | `[1, 2]` |
+| `[1]` | `[2]` | `[2, 1]` |
 | `[3, 1]` | `[4, 2]` | `[4, 3, 2, 1]` |
 | `[]` | `[1, -1]` | `[1, -1]` |
 | `[0]` | `[1, -1]` | `[1, -1, 0]` (A is read first) |
@@ -358,3 +358,61 @@ Waits for two signals and makes sure that the variables from 0 and 1 are
 read. Here the circuit will print the value of variable 0 on top and
 of variable 1 on the bottom line.
 ```
+
+## Instructions
+
+Instructions are interpreted by the `:` [character](#specials), you can put multiple instructions on the same line:
+
+```
+!                          !
+#-----                     #-----
+:p0    is equivalent to    :p0p1
+:p1
+```
+
+### Stack manipulation
+
+| Character | Name | Description |
+| :-------: | :--- | :---------- |
+| `p` | Push | Pushes a number or a string to the stack. The value to be pushed is specified right after that `p`: if it is a string, it should be enclosed with quoting marks (`"`). |
+| `o` | Pop | Pops a value from the stack, discarding it. If the stack is empty, does nothing. |
+| `d` | Duplicate | Duplicates the top value from the stack. If it is followed by an integer, duplicates the `n`-th vallue from the top of the stack. |
+| `s` | Swap | Swaps the two top values from the stack: `[..., a, b]` -> `[..., b, a]` |
+| `l` | Stack length | Pushes on the stack the length of the stack. |
+
+**Examples:**
+
+```
+!#--------+---p
+ :p0      |   :
+ :p1      |   :
+          >#--p
+           :s :
+              :
+
+Prints 1,0 on top (values are read from the top of the stack) and 0,1 on the bottom
+```
+
+```
+!#---v#---<
+ :p0 |:o  ¿-------
+     >#---^
+      :dlp10≥
+
+Fills the stack with 10 zeroes.
+```
+
+### Arithmetics
+
+| Character | Name | Description |
+| :-------: | :--- | :---------- |
+| `+` | Add | Pops two values and adds them together, pushing the result. For strings, this concatenates them. |
+| `-` | Subtract | Pops two numbers, then substracts them and pushes the result. |
+| `*` | Multiply | Pops two values, then multiplies them and pushes the result. If the left operand is a string and the right operand a number, then the string is repeated `right` times. |
+| `/` | Divide | Pops two values, then divides them and pushes the result. |
+| `%` | Modulo | Pops two values, then computes the modulo between them and pushes the result. If the left operand is a string and the right operand a number, then pushes back the `right`-th character from `left` instead. |
+| `√` | Square root | Pops a value and pushes back the square root of that value. |
+| `f` | Floor | Pops a number and floors it. If a number is specified after `f`, then floors to the nearest multiple of that value. |
+| `c` | Ceil | Pops a number and ceils it. If a number is specified after `c`, then ceils to the nearest multiple of that value. |
+| `r` | Round | Pops a number and rounds it. If a number is specified after `r`, then rounds to the nearest multiple of that value. |
+| `R` | Random | Pushes a random number between 0 and 1. If a number is specified after `R`, then pushes a random number between 0 and that value. |
