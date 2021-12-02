@@ -102,6 +102,40 @@ FUNCTIONS.set("]", (signal, x, y, grid) => {
     });
 });
 
+/// "Trims" the stack, removing the top N items, with N being either specified after `T` or popped from the stack.
+/// If N isn't an integer or is less than 0, does nothing.
+FUNCTIONS.set("T", (signal, x, y, grid) => {
+    return withNumericalInput(x, y, grid, (str) => {
+        let number;
+        if (str) {
+            number = +str;
+        } else {
+            number = signal.pop();
+        }
+
+        if (Number.isInteger(number) && number >= 0) {
+            signal.trim(number);
+        }
+    });
+});
+
+/// "Keeps" the top N items of the stack, with N being either specified after `K` or popped from the stack.
+/// If N isn't an integer or is less than 0, does nothing.
+FUNCTIONS.set("K", (signal, x, y, grid) => {
+    return withNumericalInput(x, y, grid, (str) => {
+        let number;
+        if (str) {
+            number = +str;
+        } else {
+            number = signal.pop();
+        }
+
+        if (Number.isInteger(number) && number >= 0) {
+            signal.keep(number);
+        }
+    });
+});
+
 /// Pushes a **r**andom value on the stack. Accepts an optional number to specify the upper bound of the
 /// uniform distribution.
 FUNCTIONS.set("R", (signal, x, y, grid) => {

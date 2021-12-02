@@ -275,7 +275,7 @@ CHARS.set("¿", (x, y, grid, new_grid) => {
     }
 });
 
-/// "if empty" statement, similar to "?", but only lets a signal through if it has a non-empty stack
+/// "if not empty" statement, similar to "?", but only lets a signal through if it has a non-empty stack
 CHARS.set("‽", (x, y, grid, new_grid) => {
     let signal = grid.getSignal(x, y) ?? new Signal();
     let truthy = signal.length > 0;
@@ -295,7 +295,7 @@ CHARS.set("‽", (x, y, grid, new_grid) => {
     }
 });
 
-/// "if not empty" statement, inverted variant of "‽"
+/// "if empty" statement, inverted variant of "‽"
 CHARS.set("⸘", (x, y, grid, new_grid) => {
     let signal = grid.getSignal(x, y) ?? new Signal();
     let truthy = signal.length > 0;

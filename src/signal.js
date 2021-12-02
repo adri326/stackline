@@ -64,6 +64,20 @@ export class Signal {
 
         return this;
     }
+
+    trim(amount) {
+        if (amount >= this.stack.length) {
+            this.stack = [];
+        }
+        this.stack = this.stack.slice(0, this.stack.length - amount);
+    }
+
+    keep(amount) {
+        if (amount > this.stack.length) {
+            amount = this.stack.length;
+        }
+        this.stack = this.stack.slice(this.stack.length - amount, this.stack.length);
+    }
 }
 
 export default Signal;

@@ -143,8 +143,8 @@ An empty stack is considered to have a falsy top value.
 | :-------: | :--- | :---------- |
 | `?` | "if" cell | Outputs a signal in the same direction as it came iff the top value is *truthy*. Otherwise, outputs that signal to the two orthogonal sides. |
 | `¿` | Inverted "if" cell | Outputs a signal in the same direction as it came iff the top value is *falsy*. Otherwise, outputs that signal to the two orthogonal sides. |
-| `‽` (interrobang, `U+203D`) | "if empty" cell | Outputs a signal in the same direction as it came iff the stack of that signal *is empty*. Otherwise, outputs that signal to the two orthogonal sides. |
-| `⸘` (inverted interrobang, `U+2E18`) | Inverted "if empty" cell | Outputs a signal in the same direction as it came iff the stack of that signal *isn't empty*. Otherwise, outputs that signal to the two orthogonal sides. |
+| `‽` (interrobang, `U+203D`) | "if not empty" cell | Outputs a signal in the same direction as it came iff the stack of that signal *ism't empty*. Otherwise, outputs that signal to the two orthogonal sides. |
+| `⸘` (inverted interrobang, `U+2E18`) | Inverted "if not empty" cell | Outputs a signal in the same direction as it came iff the stack of that signal *is empty*. Otherwise, outputs that signal to the two orthogonal sides. |
 | `∃` (`U+2203`) | "if exists" cell | Pops the top value from the signal, then outputs the signal in the same direction as it came iff *there is* a variable with as address the popped value. Otherwise, outputs that signal to the two orthogonal sides. |
 | `E` | Inverted "if exists" cell | Pops the top value from the signal, then outputs the signal in the same direction as it came iff *there isn't* a variable with as address the popped value. Otherwise, outputs that signal to the two orthogonal sides. |
 
@@ -202,7 +202,7 @@ to get rid of the value used by the "¿".
 ```
 
 ```
->--C#---‽---p
+>--C#---⸘---p
     :←0     :
 
 Because the "←" instruction does not push anything on the stack if there
@@ -394,6 +394,8 @@ Instructions are interpreted by the `:` [character](#specials), you can put mult
 | `l` | Stack length | Pushes on the stack the length of the stack. |
 | `[` | Rotate clockwise | Takes the top three values from the stack and applies a clockwise rotation (`[..., a, b, c]` -> `[..., b, c, a]`). If it is followed by an integer, rotates the last `n` values from the stack. |
 | `]` | Rotate counter-clockwise | Takes the top three values from the stack and applies a counter-clockwise rotation (`[..., a, b, c]` -> `[..., c, a, b]`). If it is followed by an integer, rotates the last `n` values from the stack. |
+| `K` | Keep | Keeps the top `n` values from the stack, discarding any other value. If a number is specified after `K`, it will be used as `n`; otherwise, `n` will be popped from the stack. |
+| `T` | Trim | Trims off the top `n` values from the stack, discarding them. This is the inverse operation of `K`. If a number is specified after `T`, it will be used as `n`; otherwise, `n` will be popped from the stack. |
 
 **Examples:**
 
@@ -439,6 +441,20 @@ Fills the stack with 10 zeroes.
                  :
 
 Using swap, rotate and pop, we can selectively remove elements in the stack that aren't on top.
+```
+
+```
+         >#-----#-----o
+!#---v >-|:T0K1 :dd*+ x-#--v
+ :p1 | | >#-----#-----o :+ o
+ :p2 >-+  :T1K1 :dd*+      x-#---p
+ :p3   | >#-----#-----o    o :+  :
+ :p4   >-|:T2K1 :dd*+ x-#--^
+         >#-----#-----o :+
+          :T3K1 :dd*+
+
+You can use T and K to easily distribute a piece of work among a set of concurrent circuits.
+Here, the sum from 1 to 4 of x^2+x is computed, and it looks like a fish :)
 ```
 
 ### Arithmetics
