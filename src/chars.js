@@ -315,6 +315,48 @@ CHARS.set("⸘", (x, y, grid, new_grid) => {
     }
 });
 
+/// "if exists" statement:
+CHARS.set("∃", (x, y, grid, new_grid) => {
+    let signal = grid.getSignal(x, y) ?? new Signal();
+    let address = signal.pop();
+    let truthy = signal.variables.has(address);
+
+    if (grid.getPower(x - 1, y) == 2 || grid.getPower(x + 1, y) == 2) {
+        if (truthy) {
+            CHARS.get("-")(x, y, grid, new_grid);
+        } else {
+            CHARS.get("|")(x, y, grid, new_grid);
+        }
+    } else {
+        if (truthy) {
+            CHARS.get("|")(x, y, grid, new_grid);
+        } else {
+            CHARS.get("-")(x, y, grid, new_grid);
+        }
+    }
+});
+
+/// Inverted "if exists" statement:
+CHARS.set("E", (x, y, grid, new_grid) => {
+    let signal = grid.getSignal(x, y) ?? new Signal();
+    let address = signal.pop();
+    let truthy = signal.variables.has(address);
+
+    if (grid.getPower(x - 1, y) == 2 || grid.getPower(x + 1, y) == 2) {
+        if (truthy) {
+            CHARS.get("|")(x, y, grid, new_grid);
+        } else {
+            CHARS.get("-")(x, y, grid, new_grid);
+        }
+    } else {
+        if (truthy) {
+            CHARS.get("-")(x, y, grid, new_grid);
+        } else {
+            CHARS.get("|")(x, y, grid, new_grid);
+        }
+    }
+});
+
 /// "Tunnel"
 CHARS.set(".", (x, y, grid, new_grid) => {
     let left = grid.getPower(x - 1, y);

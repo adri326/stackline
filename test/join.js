@@ -1,5 +1,3 @@
-#!/bin/env node
-
 import fs from "node:fs";
 import {expectOutput} from "./common.js";
 

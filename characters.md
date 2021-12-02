@@ -145,6 +145,8 @@ An empty stack is considered to have a falsy top value.
 | `¿` | Inverted "if" cell | Outputs a signal in the same direction as it came iff the top value is *falsy*. Otherwise, outputs that signal to the two orthogonal sides. |
 | `‽` (interrobang, `U+203D`) | "if empty" cell | Outputs a signal in the same direction as it came iff the stack of that signal *is empty*. Otherwise, outputs that signal to the two orthogonal sides. |
 | `⸘` (inverted interrobang, `U+2E18`) | Inverted "if empty" cell | Outputs a signal in the same direction as it came iff the stack of that signal *isn't empty*. Otherwise, outputs that signal to the two orthogonal sides. |
+| `∃` (`U+2203`) | "if exists" cell | Pops the top value from the signal, then outputs the signal in the same direction as it came iff *there is* a variable with as address the popped value. Otherwise, outputs that signal to the two orthogonal sides. |
+| `E` | Inverted "if exists" cell | Pops the top value from the signal, then outputs the signal in the same direction as it came iff *there isn't* a variable with as address the popped value. Otherwise, outputs that signal to the two orthogonal sides. |
 
 **Examples:**
 
@@ -206,6 +208,17 @@ to get rid of the value used by the "¿".
 Because the "←" instruction does not push anything on the stack if there
 is no variable stored at the indicated location, we can make conditionals
 based on the existence of variables.
+```
+
+```
+>--#---∃#--->--p
+   :p0 |:←0 |  :
+       >#---^
+        :p0
+
+We can use the ∃/E cells to simplify reads from variables which may not exist yet.
+This example does the same thing as the previous example, but it will print a
+default value of 0 if the variable didn't exist.
 ```
 
 ### Signal manipulators
