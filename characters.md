@@ -389,9 +389,11 @@ Instructions are interpreted by the `:` [character](#specials), you can put mult
 | :-------: | :--- | :---------- |
 | `p` | Push | Pushes a number or a string to the stack. The value to be pushed is specified right after that `p`: if it is a string, it should be enclosed with quoting marks (`"`). |
 | `o` | Pop | Pops a value from the stack, discarding it. If the stack is empty, does nothing. |
-| `d` | Duplicate | Duplicates the top value from the stack. If it is followed by an integer, duplicates the `n`-th vallue from the top of the stack. |
+| `d` | Duplicate | Duplicates the top value from the stack. If it is followed by an integer, duplicates the `n`-th value from the top of the stack. |
 | `s` | Swap | Swaps the two top values from the stack: `[..., a, b]` -> `[..., b, a]` |
 | `l` | Stack length | Pushes on the stack the length of the stack. |
+| `[` | Rotate clockwise | Takes the top three values from the stack and applies a clockwise rotation (`[..., a, b, c]` -> `[..., b, c, a]`). If it is followed by an integer, rotates the last `n` values from the stack. |
+| `]` | Rotate counter-clockwise | Takes the top three values from the stack and applies a counter-clockwise rotation (`[..., a, b, c]` -> `[..., c, a, b]`). If it is followed by an integer, rotates the last `n` values from the stack. |
 
 **Examples:**
 
@@ -413,6 +415,30 @@ Prints 1,0 on top (values are read from the top of the stack) and 0,1 on the bot
       :dlp10≥
 
 Fills the stack with 10 zeroes.
+```
+
+```
+!#---------+-#---p  Removes "4":
+ :p1p2p3p4 | :o  :
+           |     :
+           |     :
+           |
+           +-#---p  Removes "3":
+           | :so :
+           |     :
+           |     :
+           |
+           +-#---p  Removes "2":
+           | :[o :
+           |     :
+           |     :
+           |
+           >#----p  Removes "1":
+            :[4o :
+                 :
+                 :
+
+Using swap, rotate and pop, we can selectively remove elements in the stack that aren't on top.
 ```
 
 ### Arithmetics

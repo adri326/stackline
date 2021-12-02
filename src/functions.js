@@ -69,6 +69,39 @@ FUNCTIONS.set("d", (signal, x, y, grid) => {
     });
 });
 
+/// Rotate clockwise the last N values of the stack. By default, `N=3`, but this can be overridden by specifying
+/// a number after "[". This is equivalent to removing the `N-1`-th element from the top of the stack and pushing it
+/// back. If `N > signal.length`, does nothing.
+FUNCTIONS.set("[", (signal, x, y, grid) => {
+    return withNumericalInput(x, y, grid, (str) => {
+        let offset = 3;
+        if (str && Number.isInteger(+str) && +str > 0) {
+            offset = +str;
+        }
+
+        if (offset <= signal.length) {
+            let [value] = signal.stack.splice(signal.stack.length - offset, 1);
+            signal.push(value);
+        }
+    });
+});
+
+/// Rotate anti-clockwise the last N values of the stack. By default, `N=3`, but this can be overridden by specifying
+/// a number after "]". This is equivalent to popping the stack and placing that inserting that value after the `N`-th
+/// element from the top of the stack. If `N > signal.length`, does nothing.
+FUNCTIONS.set("]", (signal, x, y, grid) => {
+    return withNumericalInput(x, y, grid, (str) => {
+        let offset = 3;
+        if (str && Number.isInteger(+str) && +str > 0) {
+            offset = +str;
+        }
+
+        if (offset <= signal.length) {
+            signal.stack.splice(signal.stack.length - offset, 0, signal.pop());
+        }
+    });
+});
+
 /// Pushes a **r**andom value on the stack. Accepts an optional number to specify the upper bound of the
 /// uniform distribution.
 FUNCTIONS.set("R", (signal, x, y, grid) => {
