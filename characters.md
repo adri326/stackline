@@ -466,10 +466,12 @@ Here, the sum from 1 to 4 of x^2+x is computed, and it looks like a fish :)
 | `*` | Multiply | Pops two values, then multiplies them and pushes the result. If the left operand is a string and the right operand a number, then the string is repeated `right` times. |
 | `/` | Divide | Pops two values, then divides them and pushes the result. |
 | `%` | Modulo | Pops two values, then computes the modulo between them and pushes the result. If the left operand is a string and the right operand a number, then pushes back the `right`-th character from `left` instead. |
-| `√` | Square root | Pops a value and pushes back the square root of that value. For strings, pushes the length of the string. |
-| `f` | Floor | Pops a number and floors it. If a number is specified after `f`, then floors to the nearest multiple of that value. |
-| `c` | Ceil | Pops a number and ceils it. If a number is specified after `c`, then ceils to the nearest multiple of that value. |
-| `r` | Round | Pops a number and rounds it. If a number is specified after `r`, then rounds to the nearest multiple of that value. |
+| `√` | Square root | Pops a value and pushes back the square root of that value. For strings, pushes the string back. |
+| `a` | Absolute | Pops a value and pushes back its absolute value. For strings, pushes the length of the string. |
+| `f` | Floor | Pops a number and floors it. If a number is specified after `f`, then floors to `n` decimals. |
+| `c` | Ceil | Pops a number and ceils it. If a number is specified after `c`, then ceils to `n` decimals. |
+| `r` | Round | Pops a number and rounds it. If a number is specified after `r`, then rounds to `n` decimals. |
+| `~` | String convert | Pops a value: if it a string, tries to convert it to a number and pushes it (pushes `0` if the string isn't a valid number). If it is a number, converts it to a string and pushes it. If it is followed by a number, uses it as precision. |
 | `R` | Random | Pushes a random number between 0 and 1. If a number is specified after `R`, then pushes a random number between 0 and that value. |
 
 **Examples:**
@@ -510,11 +512,21 @@ Generates uniform random points on a disk of radius 1, using rejection sampling.
 ```
   >----------------o
 v-+                x-+-#------p
-| |<#--!-#-------->o<# :d1√%% :
+| |<#--!-#-------->o<# :d1a%% :
 >#^ :p0  :p"Hello"   :o
  :p1+
 
 Prints the letters of "Hello" one by one.
+```
+
+```
+!
+#------#-------p
+:p0.1  :~3     :
+:p0.2
+:+
+
+Add a number after "~" to control the precision of the conversion to a string.
 ```
 
 ### Comparisons

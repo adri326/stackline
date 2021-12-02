@@ -148,9 +148,9 @@ FUNCTIONS.set("R", (signal, x, y, grid) => {
     });
 });
 
-/// **F**loors the topmost element of the stack. Accepts an optional number to specify the modulus:
+/// **F**loors the topmost element of the stack. Accepts an optional number to specify the precision:
 /// - `f` rounds to the nearest integer (`[1.4]` -> `[1.0]`, `[2.83]` -> `[2.0]`)
-/// - `f0.25` rounds to the nearest quarter of an integer (`[1.4]` -> `[1.25]`, `[2.83]` -> `[2.50]`)
+/// - `f1` rounds to the nearest tenth (`[1.4]` -> `[1.4]`, `[2.83]` -> `[2.8]`)
 FUNCTIONS.set("f", (signal, x, y, grid) => {
     return withNumericalInput(x, y, grid, (str) => {
         if (str) {
@@ -162,9 +162,9 @@ FUNCTIONS.set("f", (signal, x, y, grid) => {
     });
 });
 
-/// **C**eils the topmost element of the stack. Accepts an optional number to specify the modulus:
+/// **C**eils the topmost element of the stack. Accepts an optional number to specify the precision:
 /// - `c` rounds to the nearest integer (`[1.4]` -> `[2.0]`, `[2.83]` -> `[3.0]`)
-/// - `c0.25` rounds to the nearest quarter of an integer (`[1.4]` -> `[1.5]`, `[2.83]` -> `[3.0]`)
+/// - `c1` rounds to the nearest tenth (`[1.4]` -> `[1.4]`, `[2.83]` -> `[2.9]`)
 FUNCTIONS.set("c", (signal, x, y, grid) => {
     return withNumericalInput(x, y, grid, (str) => {
         if (str) {
@@ -176,9 +176,9 @@ FUNCTIONS.set("c", (signal, x, y, grid) => {
     });
 });
 
-/// **R**ounds the topmost element of the stack. Accepts an optional number to specify the modulus:
+/// **R**ounds the topmost element of the stack. Accepts an optional number to specify the precision:
 /// - `r` rounds to the nearest integer (`[1.4]` -> `[1.0]`, `[2.83]` -> `[3.0]`)
-/// - `r0.25` rounds to the nearest quarter of an integer (`[1.4]` -> `[1.5]`, `[2.83]` -> `[2.75]`)
+/// - `r1` rounds to the nearest tenth (`[1.4]` -> `[1.4]`, `[2.83]` -> `[2.8]`)
 FUNCTIONS.set("r", (signal, x, y, grid) => {
     return withNumericalInput(x, y, grid, (str) => {
         if (str) {
@@ -228,6 +228,7 @@ FUNCTIONS.set("*", (signal) => {
 
 /// Calculates the division between the last two values of the stack:
 /// `[1, 3, 2]` -> `[1, 1.5]`; `[2, 5]` -> `[0.4]
+// TODO: string-compatible (slice)
 FUNCTIONS.set("/", (signal) => {
     let right = signal.pop();
     let left = signal.pop();
@@ -250,15 +251,52 @@ FUNCTIONS.set("%", (signal) => {
     }
 });
 
-/// Computes the square root of the last value of the stack:
+/// Computes the square root of the last value of the stack.
+/// Noop for strings.
 /// `[9]` -> `[3]`
 FUNCTIONS.set("√", (signal) => {
     let value = signal.pop();
     if (typeof value === "string") {
-        signal.push(value.length);
+        signal.push(value);
     } else {
         signal.push(Math.sqrt(value));
     }
+});
+
+/// Computes the absolute value of the last value on the stack.
+/// For strings, returns the length of the string (in unicode codepoints).
+FUNCTIONS.set("a", (signal) => {
+    // NOTE: not using "|" for readability and because "|" is usually wrongly placed
+    // at the end of an expression, making it possible to write a warning message if
+    // one ever appears there.
+
+    let value = signal.pop();
+    if (typeof value === "string") {
+        signal.push(value.length);
+    } else {
+        signal.push(Math.abs(value));
+    }
+});
+
+/// Converts back and forth between string and number
+FUNCTIONS.set("~", (signal, x, y, grid) => {
+    return withNumericalInput(x, y, grid, (str) => {
+        let value = signal.pop();
+        if (typeof value === "string") {
+            let number = +value;
+            if (isNaN(number) || !Number.isFinite(number)) {
+                number = 0;
+            }
+            signal.push(number);
+        } else {
+            if (str && Number.isInteger(+str)) {
+                let precision = Math.min(Math.max(+str, 0), 100);
+                signal.push(value.toPrecision(precision));
+            } else {
+                signal.push(String(value));
+            }
+        }
+    });
 });
 
 /// Swaps the last two elements from the stack:
