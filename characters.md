@@ -372,6 +372,63 @@ read. Here the circuit will print the value of variable 0 on top and
 of variable 1 on the bottom line.
 ```
 
+### Input/output
+
+Input is done asynchronously: a signal waiting on an input will be blocked on its corresponding cell until its condition is fulfilled.
+The remainder of the circuit will run in the meantime.
+
+The input file is by default `stdin`, but this can be overridden with the `-i` or `--input` parameter.
+Similarly, the output file is by default `stdout`, but this can be overridden with the `-o` or `--output` parameter.
+
+| Character | Name | Description |
+| :-------: | :--- | :---------- |
+| `r` | Read character | Reads a single character from the input and pushes it. If it must wait, then sets adjacent cells with state `2` to state `3` (idle) and keeps itself at state `1`. Acts like `+` upon completion. |
+| `R` | Read line | Reads a single line from the input and pushes it. If it must wait, then sets adjacent cells with state `2` to state `3` (idle) and keeps itself at state `1`. Acts like `+` upon completion. Does not include the newline. |
+| `w` | Write (no newline) | Pops the top value from the stack and writes it to the output, without a newline. Acts like `+` upon completion. |
+| `W` | Write (with newline) | Pops the top value from the stack and writes it to the output, appending a newline to it. Acts like `+` upon completion. |
+
+**Examples:**
+
+To pass an input file to the Node.JS version, give it the `-i` parameter, like so:
+
+```sh
+node . examples/cat.txt -i examples/long.txt
+```
+
+To pass an output file, give it the `-o` parameter. You can pass both `-i` and `-o`:
+
+```sh
+node . examples/cat.txt -i examples/long.txt -o my_long.txt
+```
+
+Following is an example that reads a number and doubles it:
+
+```
+!R-#-----p
+   :~p2* :
+
+Please input your number and press enter. Alternatively, use "-i" to specify
+a file with a number on its first line.
+```
+
+```
+!
+>R+-‽#---w
+| ‽v :p0%
+^#<>-#---WH
+ :o  :p""
+
+Reads a file or stdin and only prints the first character of each line.
+This doesn't work in the terminal, so you will need to use the "-o" flag
+to print to a file. Use "ctrl+d" in stdin mode whenever you want to stop
+the input.
+
+The top branch is executed when a line was read and isolates the first character,
+before printing it without a newline. The bottom branch is executed when no
+line could be read (stdin was closed with "ctrl-d" or EOF): prints a newline
+and ends the program.
+```
+
 ## Instructions
 
 Instructions are interpreted by the `:` [character](#specials), you can put multiple instructions on the same line:

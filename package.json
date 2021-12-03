@@ -1,6 +1,6 @@
 {
   "name": "stackline",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "type": "module",
   "description": "An esoteric language combining stack operations and cellular automatons, inspired by Wireworld and ORCA.",
   "main": "src/index.js",
@@ -11,6 +11,7 @@
   "license": "MIT",
   "dependencies": {
     "chalk": "^5.0.0",
-    "supports-ansi": "^1.0.6"
+    "supports-ansi": "^1.0.6",
+    "yargs": "^17.3.0"
   }
 }

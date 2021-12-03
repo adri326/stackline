@@ -226,6 +226,7 @@ CHARS.set("p", (x, y, grid, new_grid) => {
         } else {
             str = " ";
         }
+        str = str.replace(/\n/g, "\\n");
 
         for (let c = 0; c < str.length; c++) {
             new_grid.setChar(x + c + 1, y + n + 1, str[c]);
@@ -260,7 +261,7 @@ CHARS.set("?", (x, y, grid, new_grid) => {
 CHARS.set("¿", (x, y, grid, new_grid) => {
     let signal = grid.getSignal(x, y) ?? new Signal();
     let truthy = signal.pop();
-    
+
     if (grid.getPower(x - 1, y) == 2 || grid.getPower(x + 1, y) == 2) {
         if (truthy) {
             CHARS.get("|")(x, y, grid, new_grid);
@@ -614,4 +615,96 @@ CHARS.set("D", (x, y, grid, new_grid) => {
 /// Stops the simulation if the canStop parameter was set
 CHARS.set("H", (x, y, grid, new_grid) => {
     new_grid.stop();
+});
+
+// TODO: list of passives to be excluded from inactive regions
+
+/// Read a single char from stdin or the input file
+CHARS.set("r", (x, y, grid, new_grid) => {
+    if (grid.getPower(x, y) === 1 || grid.getPower(x, y) === 3) {
+        if (grid.stdin.hasChar()) {
+            if (grid.getPower(x - 1, y) === 3) new_grid.setPower(x - 1, y, 2);
+            if (grid.getPower(x + 1, y) === 3) new_grid.setPower(x + 1, y, 2);
+            if (grid.getPower(x, y - 1) === 3) new_grid.setPower(x, y - 1, 2);
+            if (grid.getPower(x, y + 1) === 3) new_grid.setPower(x, y + 1, 2);
+
+            let signal = new_grid.getSignal(x, y);
+            if (signal) {
+                signal.push(grid.stdin.getChar());
+            }
+
+            return CHARS.get("+")(x, y, grid, new_grid);
+        } else if (grid.stdin.isClosed()) {
+            if (grid.getPower(x - 1, y) === 3) new_grid.setPower(x - 1, y, 2);
+            if (grid.getPower(x + 1, y) === 3) new_grid.setPower(x + 1, y, 2);
+            if (grid.getPower(x, y - 1) === 3) new_grid.setPower(x, y - 1, 2);
+            if (grid.getPower(x, y + 1) === 3) new_grid.setPower(x, y + 1, 2);
+
+            return CHARS.get("+")(x, y, grid, new_grid);
+        } else if (grid.getPower(x, y) === 1) {
+            // Put ourself on hold
+            if (grid.getPower(x - 1, y) === 2) new_grid.setPower(x - 1, y, 3);
+            if (grid.getPower(x + 1, y) === 2) new_grid.setPower(x + 1, y, 3);
+            if (grid.getPower(x, y - 1) === 2) new_grid.setPower(x, y - 1, 3);
+            if (grid.getPower(x, y + 1) === 2) new_grid.setPower(x, y + 1, 3);
+
+            new_grid.setPower(x, y, 1);
+            return false;
+        }
+    }
+});
+
+/// Read an entire line from stdin or the input file
+CHARS.set("R", (x, y, grid, new_grid) => {
+    if (grid.getPower(x, y) === 1 || grid.getPower(x, y) === 3) {
+        if (grid.stdin.hasLine()) {
+            if (grid.getPower(x - 1, y) === 3) new_grid.setPower(x - 1, y, 2);
+            if (grid.getPower(x + 1, y) === 3) new_grid.setPower(x + 1, y, 2);
+            if (grid.getPower(x, y - 1) === 3) new_grid.setPower(x, y - 1, 2);
+            if (grid.getPower(x, y + 1) === 3) new_grid.setPower(x, y + 1, 2);
+
+            let signal = new_grid.getSignal(x, y);
+            if (signal) {
+                signal.push(grid.stdin.getLine());
+            }
+
+            return CHARS.get("+")(x, y, grid, new_grid);
+        } else if (grid.stdin.isClosed()) {
+            if (grid.getPower(x - 1, y) === 3) new_grid.setPower(x - 1, y, 2);
+            if (grid.getPower(x + 1, y) === 3) new_grid.setPower(x + 1, y, 2);
+            if (grid.getPower(x, y - 1) === 3) new_grid.setPower(x, y - 1, 2);
+            if (grid.getPower(x, y + 1) === 3) new_grid.setPower(x, y + 1, 2);
+
+            return CHARS.get("+")(x, y, grid, new_grid);
+        } else if (grid.getPower(x, y) === 1) {
+            // Put ourself on hold
+            if (grid.getPower(x - 1, y) === 2) new_grid.setPower(x - 1, y, 3);
+            if (grid.getPower(x + 1, y) === 2) new_grid.setPower(x + 1, y, 3);
+            if (grid.getPower(x, y - 1) === 2) new_grid.setPower(x, y - 1, 3);
+            if (grid.getPower(x, y + 1) === 2) new_grid.setPower(x, y + 1, 3);
+
+            new_grid.setPower(x, y, 1);
+            return false;
+        }
+    }
+});
+
+CHARS.set("w", (x, y, grid, new_grid) => {
+    let signal = new_grid.getSignal(x, y);
+
+    if (signal) {
+        grid.stdout.write(String(signal.pop()));
+    }
+
+    CHARS.get("+")(x, y, grid, new_grid);
+});
+
+CHARS.set("W", (x, y, grid, new_grid) => {
+    let signal = new_grid.getSignal(x, y);
+
+    if (signal) {
+        grid.stdout.write(String(signal.pop()) + "\n");
+    }
+
+    CHARS.get("+")(x, y, grid, new_grid);
 });

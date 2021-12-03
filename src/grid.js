@@ -1,6 +1,7 @@
 "use strict";
 
 import Signal from "./signal.js";
+import IO from "./io.js";
 
 export const REGION_SIZE = 4;
 
@@ -24,6 +25,8 @@ export class Grid {
         this.width = width;
         this.height = height;
         this.shouldStop = false;
+        this.stdin = new IO(null);
+        this.stdout = new IO(null);
         this._chars = newTable(this.width, this.height, " ");
         this._power = newTable(this.width, this.height, 0);
         this._signals = new Map();

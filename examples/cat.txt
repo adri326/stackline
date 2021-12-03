@@ -1,0 +1,9 @@
+!>R+-‽>-W
+ | ‽ #-v
+ ^#< : >-WH
+  :o :p""
+
+This program does the same thing as the "cat" program with one input:
+it just prints whatever it gets as input. Since "R" will do nothing
+once the input stops, it will leave the stack empty, which we detect
+with ‽ and use it to halt.
