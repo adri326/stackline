@@ -228,11 +228,30 @@ FUNCTIONS.set("*", (signal) => {
 
 /// Calculates the division between the last two values of the stack:
 /// `[1, 3, 2]` -> `[1, 1.5]`; `[2, 5]` -> `[0.4]
-// TODO: string-compatible (slice)
+///
+/// If the division results in an infinite value or NaN, pushes `0` instead.
+///
+/// If the left value is a string and the right value is a integer, then, depending on the sign of the number:
+/// - for positive values, only keeps the first `right` characters
+/// - for negative values, only keeps the last `right` characters
+/// The feature set of `String::slice` can be emulated with two `/` operations and, if needed, `l` and `-`.
 FUNCTIONS.set("/", (signal) => {
     let right = signal.pop();
     let left = signal.pop();
-    signal.push(left / right);
+    if (typeof left === "string" && Number.isInteger(right)) {
+        if (right < 0) {
+            signal.push(left.slice(right));
+        } else {
+            signal.push(left.slice(0, right));
+        }
+    } else if (typeof left === "number" && typeof right === "number") {
+        let res = left / right;
+        if (isNaN(res) || !Number.isFinite(res)) {
+            signal.push(0);
+        } else {
+            signal.push(res);
+        }
+    }
 });
 
 /// Calculates the remainder between the last two values of the stack:

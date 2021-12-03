@@ -1,0 +1,30 @@
+!#-v
+ : .
+ :p"Hello, world"
+
+   >.                 .         Puts substrings of "Hello, world"
+   |                  c         on the stack.
+   .#---v#----+-#.    vv<.p
+    :p0 |:o   ? :K1   o»v :
+        >#----^       ^-+     >p
+         :p1+d1d1/    v-#-----^:
+         :d2ad2≥        :lp5-T :
+                               :
+                               :
+                               :
+
+  >v            Splits the given string by spaces, then converts
+!#^.            the substrings as numbers and computes their sum.
+ :p"12 34 45"   Could be made simpler by using variables instead.
+
+ = .#----v-----<------<      >---v      k+
+ =  :p0 v#     ^#---< |      |   |      k+
+ =  :p0 |:p1+   :o  ¿#^      +-f v      k+  >-v--<
+ =      +v          |:osod   | co»+---+ k+  | |  ¿----pH
+ =      o»-#--------+-----?+#^  ^-<   | k+  | >#-^   Σ:
+           :d1-]           |:da       V  |  |  :+lp1=
+           :d1a-/          |:d4ad3>   o»-+  |
+           :s/             |:-/K1~     c >--+p
+           :ddap1-%p" "=   #.     .?f--^     :
+           :d4ad3≤+        :d3ad2<           :
+                                             :

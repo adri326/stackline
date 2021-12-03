@@ -464,7 +464,7 @@ Here, the sum from 1 to 4 of x^2+x is computed, and it looks like a fish :)
 | `+` | Add | Pops two values and adds them together, pushing the result. For strings, this concatenates them. |
 | `-` | Subtract | Pops two numbers, then substracts them and pushes the result. |
 | `*` | Multiply | Pops two values, then multiplies them and pushes the result. If the left operand is a string and the right operand a number, then the string is repeated `right` times. |
-| `/` | Divide | Pops two values, then divides them and pushes the result. |
+| `/` | Divide | Pops two values, then divides them and pushes the result. If the left value is a string and the right value is a number, then slices the string by that number (if positive, keeps the `n` first characters and if negative, keeps the `-n` last characters). |
 | `%` | Modulo | Pops two values, then computes the modulo between them and pushes the result. If the left operand is a string and the right operand a number, then pushes back the `right`-th character from `left` instead. |
 | `√` | Square root | Pops a value and pushes back the square root of that value. For strings, pushes the string back. |
 | `a` | Absolute | Pops a value and pushes back its absolute value. For strings, pushes the length of the string. |
