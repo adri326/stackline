@@ -236,9 +236,10 @@ CHARS.set("p", (x, y, grid, new_grid) => {
 
 /// "if" statement: outputs a signal in the same direction iff the top value is truthy,
 /// otherwise outputs on the orthogonal sides
+/// Afterwards, pops the top value
 CHARS.set("?", (x, y, grid, new_grid) => {
     let signal = grid.getSignal(x, y) ?? new Signal();
-    let truthy = !!signal.peek();
+    let truthy = signal.pop();
 
     if (grid.getPower(x - 1, y) == 2 || grid.getPower(x + 1, y) == 2) {
         if (truthy) {
@@ -258,8 +259,8 @@ CHARS.set("?", (x, y, grid, new_grid) => {
 /// Inverted "if" statement
 CHARS.set("¿", (x, y, grid, new_grid) => {
     let signal = grid.getSignal(x, y) ?? new Signal();
-    let truthy = !!signal.peek();
-
+    let truthy = signal.pop();
+    
     if (grid.getPower(x - 1, y) == 2 || grid.getPower(x + 1, y) == 2) {
         if (truthy) {
             CHARS.get("|")(x, y, grid, new_grid);

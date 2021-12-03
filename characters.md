@@ -141,10 +141,10 @@ An empty stack is considered to have a falsy top value.
 
 | Character | Name | Description |
 | :-------: | :--- | :---------- |
-| `?` | "if" cell | Outputs a signal in the same direction as it came iff the top value is *truthy*. Otherwise, outputs that signal to the two orthogonal sides. |
-| `¿` | Inverted "if" cell | Outputs a signal in the same direction as it came iff the top value is *falsy*. Otherwise, outputs that signal to the two orthogonal sides. |
-| `‽` (interrobang, `U+203D`) | "if not empty" cell | Outputs a signal in the same direction as it came iff the stack of that signal *ism't empty*. Otherwise, outputs that signal to the two orthogonal sides. |
-| `⸘` (inverted interrobang, `U+2E18`) | Inverted "if not empty" cell | Outputs a signal in the same direction as it came iff the stack of that signal *is empty*. Otherwise, outputs that signal to the two orthogonal sides. |
+| `?` | "if" cell | Outputs a signal in the same direction as it came iff the top value is *truthy*. Otherwise, outputs that signal to the two orthogonal sides. Afterwards, pops the stack. |
+| `¿` | Inverted "if" cell | Outputs a signal in the same direction as it came iff the top value is *falsy*. Otherwise, outputs that signal to the two orthogonal sides. Afterwards, pops the stack. |
+| `‽` (interrobang, `U+203D`) | "if not empty" cell | Outputs a signal in the same direction as it came iff the stack of that signal *isn't empty*. Otherwise, outputs that signal to the two orthogonal sides. |
+| `⸘` (inverted interrobang, `U+2E18`) | "if empty" cell | Outputs a signal in the same direction as it came iff the stack of that signal *is empty*. Otherwise, outputs that signal to the two orthogonal sides. |
 | `∃` (`U+2203`) | "if exists" cell | Pops the top value from the signal, then outputs the signal in the same direction as it came iff *there is* a variable with as address the popped value. Otherwise, outputs that signal to the two orthogonal sides. |
 | `E` | Inverted "if exists" cell | Pops the top value from the signal, then outputs the signal in the same direction as it came iff *there isn't* a variable with as address the popped value. Otherwise, outputs that signal to the two orthogonal sides. |
 
