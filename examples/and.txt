@@ -1,15 +1,15 @@
- ===      Complete and gate:
+ ===   Complete and gate:
 !>-v
- ^-+#-------?#-fv   >p5        Synchronization gate:
-    :Rdp0.2< :o +o»-^:
-                o c  :              !>----+--v
-                x-+--p3              |    |  |
-                o c  :               |    | o»‽---p4
-!>-v            +o»-v:               ^----< ^     :
- ^-+#-------?#-f^   +p5                     +p4
-    :Rdp0.2< :o     |:                !>+-#-^:
- kkk                |:                 ^< :pR
- +++-.             .<
+ ^-+#-------?-fv   >p5          Synchronization gate:
+    :Rdp0.2<   +o»-^:
+               o c  :              !>----+--v
+               x-+--p3              |    |  |
+               o c  :               |    | o»‽---p4
+!>-v           +o»-v:               ^----< ^     :
+ ^-+#-------?-f^   +p5                     +p4
+    :Rdp0.2<       |:                !>+-#-^:
+ kkk               |:                 ^< :pR
+ +++-.            .<
 
 
                Simplified versions:
