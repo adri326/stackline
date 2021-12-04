@@ -244,6 +244,8 @@ FUNCTIONS.set("/", (signal) => {
         } else {
             signal.push(left.slice(0, right));
         }
+    } else if (typeof left === "string" && typeof right === "string") {
+        signal.push(left.indexOf(right));
     } else if (typeof left === "number" && typeof right === "number") {
         let res = left / right;
         if (isNaN(res) || !Number.isFinite(res)) {

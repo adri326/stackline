@@ -1,21 +1,22 @@
 !#-v
- : .
- :p"Hello, world"
+ : .                Puts substrings of "Hello, world"
+ :p"Hello, world"   on the stack:
 
-   >.                 .         Puts substrings of "Hello, world"
-   |                  c         on the stack.
-   .#---v#----+-#.    vv<.p
-    :p0 |:o   ? :K1   o»v :
+   >.                 .
+   |                  c                                        >v           Splits a string by spaces,
+   .#---v#----+-#.    vv<.p                                  !#^.           and converts the substrings
+    :p0 |:o   ? :K1   o»v :                                   :p"12 34 45"  to numbers.
         >#----^       ^-+     >p
-         :p1+d1d1/    v-#-----^:
-         :d2ad2≥        :lp5-T :
-                               :
-                               :
-                               :
+         :p1+d1d1/    v-#-----^:                                         .          .<
+         :d2ad2≥        :lp5-T :                                .#-----v#<           +->--#-------p
+                               :                                 :p" " |:d2a-p1+[s/s ¿#^  :[s/K1~ :
+                               :                                       >#.          .^:od1a
+                               :                                        :d1d1/dp-1=
+
 
   >v            Splits the given string by spaces, then converts
 !#^.            the substrings as numbers and computes their sum.
- :p"12 34 45"   Could be made simpler by using variables instead.
+ :p"12 34 45"   This design can be made much simpler.
 
  = .#----v-----<------<      >---v      k+
  =  :p0 v#     ^#---< |      |   |      k+
