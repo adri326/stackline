@@ -372,25 +372,33 @@ CHARS.set(".", (x, y, grid, new_grid) => {
         if (left == 2) {
             while (x2 < grid.width) {
                 x2 += 1;
-                if (grid.getChar(x2, y) == ".") break;
+                let char = grid.getChar(x2, y);
+                if (char === "=") return;
+                if (char === ".") break;
             }
             if (x2 >= grid.width) return true;
         } else if (right == 2) {
             while (x2 >= 0) {
                 x2 -= 1;
-                if (grid.getChar(x2, y) == ".") break;
+                let char = grid.getChar(x2, y);
+                if (char === "=") return;
+                if (char === ".") break;
             }
             if (x2 < 0) return true;
         } else if (top == 2) {
             while (y2 < grid.height) {
                 y2 += 1;
-                if (grid.getChar(x, y2) == ".") break;
+                let char = grid.getChar(x, y2);
+                if (char === "=") return;
+                if (char === ".") break;
             }
             if (y2 >= grid.height) return true;
         } else {
             while (y2 >= 0) {
                 y2 -= 1;
-                if (grid.getChar(x, y2) == ".") break;
+                let char = grid.getChar(x, y2);
+                if (char === "=") return;
+                if (char === ".") break;
             }
             if (y2 < 0) return true;
         }
@@ -707,4 +715,31 @@ CHARS.set("W", (x, y, grid, new_grid) => {
     }
 
     CHARS.get("+")(x, y, grid, new_grid);
+});
+
+CHARS.set("d", (x, y, grid, new_grid) => {
+    let signal = new_grid.getSignal(x, y);
+
+    let wait = signal.pop();
+    if (wait > 0) {
+        if (grid.getPower(x - 1, y) === 2) new_grid.setPower(x - 1, y, 3);
+        if (grid.getPower(x + 1, y) === 2) new_grid.setPower(x + 1, y, 3);
+        if (grid.getPower(x, y - 1) === 2) new_grid.setPower(x, y - 1, 3);
+        if (grid.getPower(x, y + 1) === 2) new_grid.setPower(x, y + 1, 3);
+        signal.push(wait - 1);
+
+        new_grid.setPower(x, y, 1);
+        return false;
+    } else {
+        if (grid.getPower(x - 1, y) === 3) new_grid.setPower(x - 1, y, 2);
+        if (grid.getPower(x + 1, y) === 3) new_grid.setPower(x + 1, y, 2);
+        if (grid.getPower(x, y - 1) === 3) new_grid.setPower(x, y - 1, 2);
+        if (grid.getPower(x, y + 1) === 3) new_grid.setPower(x, y + 1, 2);
+
+        if (typeof wait !== "number" && wait !== undefined) {
+            signal.push(wait);
+        }
+
+        CHARS.get("+")(x, y, grid, new_grid);
+    }
 });

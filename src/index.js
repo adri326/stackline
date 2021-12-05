@@ -14,7 +14,7 @@ import IO from "./io.js";
 
 // Simulation-related constants
 
-const DT = 1000/30;
+const DT = 1000/60;
 const ITERATIONS_PER_FRAME = 1; // Increase this if you want to run the "brainfuck" example
 const CAN_STOP = true;
 
@@ -130,6 +130,11 @@ function loop() {
 
 function stop() {
     clear();
+    if (toWrite !== "") {
+        if (supportsAnsi) process.stdout.write("\x1b[K");
+        process.stdout.write(toWrite);
+        toWrite = "";
+    }
     print();
 
     if (supportsAnsi) {

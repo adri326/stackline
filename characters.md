@@ -70,7 +70,8 @@ that can duplicate signals.
 | `#` | Hold | Sends the signal down and waits, by settings itself to state `3` (idle), and any horizontally adjacent cell that has state `2` (resting) to state `3`. Once it is reactivated (if the bottom cell has a state of `2` or one of the horizontally adjacent cells has state `3`), unlocks adjacent cells and sends the result signal horizontally. |
 | `:` | Execute | Executes the [instructions](#instructions) to its right with the current signal, then sends down the altered signal and becomes state `3` (idle) if the character below it is a `:`. Otherwise, sends the signal up until it finds a non-`:` character, setting every `:` (including itself) to state `2` (resting). *Also used by `p`* |
 | `p` | Debug print | Prints the first few elements of the stack into the simulation. Does not check whether or not it will write over important pieces of circuitry, so use at your own risk! Only prints to the right of `:` that are placed right below it. Can be followed by a number that specifies the precision of the numerical values. |
-| `.` | Tunnel | Sends the signal to the next `.` in the same direction as it came. Upon receival, acts like a `+`. |
+| `.` | Tunnel | Sends the signal to the next `.` in the same direction as it came. If a wall (`=`) is encountered, stops transmitting the signal. Upon receival, acts like a `+`. |
+| `d` | Delay | Pops a value from the stack; if it is a positive number, wait that amount of ticks. Then, it acts like a `+`. If the value isn't a number, it gets pushed back on the stack. |
 | `H` | Halt | Stops the simulation, can be disabled in the simulation settings. |
 
 `#` and `:` are meant to be used together in almost every scenario.
@@ -100,6 +101,11 @@ Prints "0" here ^
 !-+   >----  delays. The "#" introduces two ticks of delay
   >#-#^      and each ":" adds one tick.
    : :
+
+  >---v      Alternatively, you can use the "d" char to control
+!-+   >----  the delay more precisely. Here, the "#"/":" pair adds
+  >#--d      three ticks of delay and the "d" will wait for an added
+   :p9       nine ticks.
 ```
 
 ```
@@ -444,7 +450,7 @@ Instructions are interpreted by the `:` [character](#specials), you can put mult
 
 | Character | Name | Description |
 | :-------: | :--- | :---------- |
-| `p` | Push | Pushes a number or a string to the stack. The value to be pushed is specified right after that `p`: if it is a string, it should be enclosed with quoting marks (`"`). |
+| `p` | Push | Pushes a number or a string to the stack. The value to be pushed is specified right after that `p`: if it is a string, it should be enclosed with quoting marks (`"`). Escapes code are available; see below. |
 | `o` | Pop | Pops a value from the stack, discarding it. If the stack is empty, does nothing. |
 | `d` | Duplicate | Duplicates the top value from the stack. If it is followed by an integer, duplicates the `n`-th value from the top of the stack. |
 | `s` | Swap | Swaps the two top values from the stack: `[..., a, b]` -> `[..., b, a]` |
@@ -453,6 +459,13 @@ Instructions are interpreted by the `:` [character](#specials), you can put mult
 | `]` | Rotate counter-clockwise | Takes the top three values from the stack and applies a counter-clockwise rotation (`[..., a, b, c]` -> `[..., c, a, b]`). If it is followed by an integer, rotates the last `n` values from the stack. |
 | `K` | Keep | Keeps the top `n` values from the stack, discarding any other value. If a number is specified after `K`, it will be used as `n`; otherwise, `n` will be popped from the stack. |
 | `T` | Trim | Trims off the top `n` values from the stack, discarding them. This is the inverse operation of `K`. If a number is specified after `T`, it will be used as `n`; otherwise, `n` will be popped from the stack. |
+
+Escape codes can be used in strings to encode special characters:
+- `\n` for newlines
+- `\r` for carriage returns
+- `\"` for quoting marks
+- `\t` for tabulations
+- `\\` for backslashes
 
 **Examples:**
 

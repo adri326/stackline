@@ -10,11 +10,20 @@ FUNCTIONS.set("p", (signal, x, y, grid) => {
     if (grid.getChar(x + 1, y) == "\"") {
         let str = "";
         let offset = 2;
-        while (grid.getChar(x + offset, y) != "\"") {
+        while (grid.getChar(x + offset, y) != "\"" || grid.getChar(x + offset - 1, y) == "\\") {
             str += grid.getChar(x + offset, y);
             offset += 1;
         }
-        signal.push(str);
+
+        signal.push(str
+            .replace(/\\n/g, "\n")
+            .replace(/\\r/g, "\r")
+            .replace(/\\t/g, "\t")
+            .replace(/\\"/g, "\"")
+            .replace(/\\\\/g, "\\")
+        );
+        // TODO: unicode codepoints with \u or \x
+
         return offset + 1;
     } else if (/^[0-9\-\.]$/.exec(grid.getChar(x + 1, y))) {
         let str = "";
