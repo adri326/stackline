@@ -20,9 +20,9 @@
    :→1 |       |>-#-----?-#----------v            >-------------v >------------->#---+-v    |:
        | v#----++ :p"["=  :←1p2+→-1  .  >¿---v    |        >#--->-+             |:p1+  +----^:
        | |:←1p2 >+#-----?-#--------.    || v-<-<  |     .v |:so  |              |      |     :
-       | |:+←    |:p"]"=  :←1p2+→-1   .>^| |   ¿--^      .>?#----^              |      |     :
+       | |:+←    |:p"]"=  :←1p2+→-1   .>^| |   ?--^      .>?#----^              |      |     :
        | p       +#-----?-v            v#< +#--^          . :od                 |      |     :
-       | :       .:p"."=  +-------v    |:d  :p1+←0d1%p"]"=                      |      |     :
+       | :       .:p"."=  +-------v    |:d  :p1+←0d1%p"]"≠                      |      |     :
        |                  .       >---->----------------------------------------^      |     :
        ^-------------------------------------------------------------------------------<     :
                    v----<
@@ -40,5 +40,5 @@ p----------------+-«o   ^#<        |   :               |
 :       not handle input (,) though, but that isn't required to prove that this language is Turing Complete.
 :
 :       If you plan on actually running this example yourself, make sure to set the "ITERATIONS_PER_FRAME"
-:       to a high value (something like 1000), or you'll be waiting a while. The setting can be found in
-:       "src/index.js".
+:       to a high value (something like 1000), or you'll be waiting a while. The setting can be changed by
+:       running the command line tool with the "--mult" option.
