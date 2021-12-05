@@ -14,7 +14,7 @@ import IO from "./io.js";
 
 // Simulation-related constants
 
-const DT = 1000/60;
+const DT = 1000/30;
 const ITERATIONS_PER_FRAME = 1; // Increase this if you want to run the "brainfuck" example
 const CAN_STOP = true;
 
@@ -95,7 +95,7 @@ function print() {
         if (str !== "") {
             writeColored(lastPower, str);
         }
-        process.stdout.write("\n");
+        if (y < grid._chars.length || str !== "") process.stdout.write("\n");
     }
 }
 
@@ -112,6 +112,7 @@ function loop() {
     let start = performance.now();
     for (let n = 0; n < ITERATIONS_PER_FRAME; n++) {
         if (step(grid_a, grid_b, CAN_STOP)) {
+            process.stdin.pause();
             return stop();
         }
     }

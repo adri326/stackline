@@ -4,6 +4,8 @@ export class Signal {
     constructor(stackOrSignal = [], variables = null) {
         if (stackOrSignal instanceof Signal) {
             // Clone stackOrSignal
+            this.originX = stackOrSignal.originX;
+            this.originY = stackOrSignal.originY;
             this.stack = [...stackOrSignal.stack];
             this.variables = new Map(stackOrSignal.variables);
         } else if (Array.isArray(stackOrSignal)) {
@@ -15,8 +17,16 @@ export class Signal {
                 throw new Error("Parameter error: expected 'variables' to be iterable or null, got " + variables);
             }
 
+            this.originX = null;
+            this.originY = null;
+
             this.stack = stackOrSignal;
         }
+    }
+
+    setOrigin(x, y) {
+        this.originX = x;
+        this.originY = y;
     }
 
     push(value) {

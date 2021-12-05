@@ -224,6 +224,7 @@ export class Grid {
                 })`
             );
         }
+        signal.setOrigin(sx, sy);
 
         this._signals.set(`${dx},${dy}`, new Signal(signal));
     }
@@ -244,6 +245,7 @@ export class Grid {
                 })`
             );
         }
+        signal.setOrigin(sx, sy);
 
         this._signals.set(`${dx},${dy}`, signal);
         this._signals.delete(key);

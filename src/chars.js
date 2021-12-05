@@ -6,7 +6,18 @@ import Signal from "./signal.js";
 const CHARS = new Map();
 export default CHARS;
 
+// TODO: avoid sending the signal to an insulated cell?
+
 CHARS.set("-", (x, y, grid, new_grid) => {
+    let signal = grid.getSignal(x, y);
+    if (signal.originX !== null && signal.originY !== null) {
+        // Origin is available: do origin analysis for wire insulation
+        if (signal.originY !== y) {
+            new_grid.setPower(x, y, 0);
+            new_grid.removeSignal(x, y);
+            return false;
+        }
+    }
     if (grid.hasChar(x - 1, y) && grid.getPower(x - 1, y) == 0) {
         new_grid.setPower(x - 1, y);
         new_grid.copySignal(x, y, x - 1, y);
@@ -21,6 +32,15 @@ CHARS.set("-", (x, y, grid, new_grid) => {
 });
 
 CHARS.set("|", (x, y, grid, new_grid) => {
+    let signal = grid.getSignal(x, y);
+    if (signal.originX !== null && signal.originY !== null) {
+        // Origin is available: do origin analysis for wire insulation
+        if (signal.originX !== x) {
+            new_grid.setPower(x, y, 0);
+            new_grid.removeSignal(x, y);
+            return false;
+        }
+    }
     if (grid.hasChar(x, y - 1) && grid.getPower(x, y - 1) == 0) {
         new_grid.setPower(x, y - 1);
         new_grid.copySignal(x, y, x, y - 1);
@@ -110,6 +130,8 @@ CHARS.set("V", (x, y, grid, new_grid) => {
 
 CHARS.set("!", (x, y, grid, new_grid) => {
     let signal = new Signal();
+    signal.setOrigin(x, y);
+
     new_grid.setPower(x - 1, y);
     new_grid.setPower(x + 1, y);
     new_grid.setPower(x, y - 1);
@@ -192,6 +214,7 @@ CHARS.set(":", (x, y, grid, new_grid) => {
         }
         new_grid.removeSignal(x, y - offset);
         new_grid.removeSignal(x, y);
+        signal.setOrigin(x, y);
         new_grid.newSignal(x, y - offset, signal);
         new_grid.setPower(x, y - offset, 1); // Wake up caller
     }
@@ -235,6 +258,80 @@ CHARS.set("p", (x, y, grid, new_grid) => {
     return CHARS.get("-")(x, y, grid, new_grid);
 });
 
+const LEFT = 1;
+const RIGHT = 2;
+const UP = 4;
+const DOWN = 8;
+const HORIZONTAL = 3;
+const VERTICAL = 12;
+
+function getSignalOrigin(signal, x, y, grid) {
+    if (signal.originX === null || signal.originY === null) {
+        // No origin available, falling back to cell state
+        if (grid.getPower(x - 1, y) == 2) return LEFT;
+        if (grid.getPower(x + 1, y) == 2) return RIGHT;
+        if (grid.getPower(x, y - 1) == 2) return UP;
+        if (grid.getPower(x, y + 1) == 2) return DOWN;
+    } else {
+        if (signal.originX === x) {
+            if (signal.originY < y) return UP;
+            if (signal.originY > y) return DOWN;
+        } else if (signal.originY === y) {
+            if (signal.originX < x) return LEFT;
+            if (signal.originX > x) return RIGHT;
+        }
+    }
+    return 0;
+}
+
+function getOrthogonal(direction) {
+    if (direction & HORIZONTAL) return VERTICAL;
+    else if (direction & VERTICAL) return HORIZONTAL;
+}
+
+function getOpposite(direction) {
+    if (direction === LEFT) return RIGHT;
+    if (direction === RIGHT) return LEFT;
+    if (direction === UP) return DOWN;
+    if (direction === DOWN) return UP;
+
+    return 0;
+}
+
+function stepDirection(direction, x, y) {
+    if (direction === LEFT) return [x - 1, y];
+    if (direction === RIGHT) return [x + 1, y];
+    if (direction === UP) return [x, y - 1];
+    if (direction === DOWN) return [x, y + 1];
+
+    return [x, y];
+}
+
+function copySignalInDirections(direction, x, y, new_grid, signal) {
+    for (let bit = 0; bit < 4; bit++) {
+        let dir = direction & (1 << bit);
+        if (dir) {
+            let target = stepDirection(dir, x, y);
+
+            new_grid.newSignal(...target, new Signal(signal));
+            new_grid.setPower(...target, 1);
+        }
+    }
+}
+
+function conditional(x, y, grid, new_grid, signal, sendThrough) {
+    let origin = getSignalOrigin(signal, x, y, grid);
+    signal.setOrigin(x, y);
+
+    let targetDirection = sendThrough ? getOpposite(origin) : getOrthogonal(origin);
+
+    if (!targetDirection) {
+        throw new Error("Could not determine signal origin!");
+    }
+
+    copySignalInDirections(targetDirection, x, y, new_grid, signal);
+}
+
 /// "if" statement: outputs a signal in the same direction iff the top value is truthy,
 /// otherwise outputs on the orthogonal sides
 /// Afterwards, pops the top value
@@ -242,39 +339,15 @@ CHARS.set("?", (x, y, grid, new_grid) => {
     let signal = grid.getSignal(x, y) ?? new Signal();
     let truthy = signal.pop();
 
-    if (grid.getPower(x - 1, y) == 2 || grid.getPower(x + 1, y) == 2) {
-        if (truthy) {
-            CHARS.get("-")(x, y, grid, new_grid);
-        } else {
-            CHARS.get("|")(x, y, grid, new_grid);
-        }
-    } else {
-        if (truthy) {
-            CHARS.get("|")(x, y, grid, new_grid);
-        } else {
-            CHARS.get("-")(x, y, grid, new_grid);
-        }
-    }
+    conditional(x, y, grid, new_grid, signal, truthy);
 });
 
 /// Inverted "if" statement
 CHARS.set("¿", (x, y, grid, new_grid) => {
     let signal = grid.getSignal(x, y) ?? new Signal();
-    let truthy = signal.pop();
+    let falsy = !signal.pop();
 
-    if (grid.getPower(x - 1, y) == 2 || grid.getPower(x + 1, y) == 2) {
-        if (truthy) {
-            CHARS.get("|")(x, y, grid, new_grid);
-        } else {
-            CHARS.get("-")(x, y, grid, new_grid);
-        }
-    } else {
-        if (truthy) {
-            CHARS.get("-")(x, y, grid, new_grid);
-        } else {
-            CHARS.get("|")(x, y, grid, new_grid);
-        }
-    }
+    conditional(x, y, grid, new_grid, signal, falsy);
 });
 
 /// "if not empty" statement, similar to "?", but only lets a signal through if it has a non-empty stack
@@ -282,39 +355,15 @@ CHARS.set("‽", (x, y, grid, new_grid) => {
     let signal = grid.getSignal(x, y) ?? new Signal();
     let truthy = signal.length > 0;
 
-    if (grid.getPower(x - 1, y) == 2 || grid.getPower(x + 1, y) == 2) {
-        if (truthy) {
-            CHARS.get("-")(x, y, grid, new_grid);
-        } else {
-            CHARS.get("|")(x, y, grid, new_grid);
-        }
-    } else {
-        if (truthy) {
-            CHARS.get("|")(x, y, grid, new_grid);
-        } else {
-            CHARS.get("-")(x, y, grid, new_grid);
-        }
-    }
+    conditional(x, y, grid, new_grid, signal, truthy);
 });
 
 /// "if empty" statement, inverted variant of "‽"
 CHARS.set("⸘", (x, y, grid, new_grid) => {
     let signal = grid.getSignal(x, y) ?? new Signal();
-    let truthy = signal.length > 0;
+    let falsy = signal.length === 0;
 
-    if (grid.getPower(x - 1, y) == 2 || grid.getPower(x + 1, y) == 2) {
-        if (truthy) {
-            CHARS.get("|")(x, y, grid, new_grid);
-        } else {
-            CHARS.get("-")(x, y, grid, new_grid);
-        }
-    } else {
-        if (truthy) {
-            CHARS.get("-")(x, y, grid, new_grid);
-        } else {
-            CHARS.get("|")(x, y, grid, new_grid);
-        }
-    }
+    conditional(x, y, grid, new_grid, signal, falsy);
 });
 
 /// "if exists" statement:
@@ -323,53 +372,36 @@ CHARS.set("∃", (x, y, grid, new_grid) => {
     let address = signal.pop();
     let truthy = signal.variables.has(address);
 
-    if (grid.getPower(x - 1, y) == 2 || grid.getPower(x + 1, y) == 2) {
-        if (truthy) {
-            CHARS.get("-")(x, y, grid, new_grid);
-        } else {
-            CHARS.get("|")(x, y, grid, new_grid);
-        }
-    } else {
-        if (truthy) {
-            CHARS.get("|")(x, y, grid, new_grid);
-        } else {
-            CHARS.get("-")(x, y, grid, new_grid);
-        }
-    }
+    conditional(x, y, grid, new_grid, signal, truthy);
 });
 
 /// Inverted "if exists" statement:
 CHARS.set("E", (x, y, grid, new_grid) => {
     let signal = grid.getSignal(x, y) ?? new Signal();
     let address = signal.pop();
-    let truthy = signal.variables.has(address);
+    let falsy = !signal.variables.has(address);
 
-    if (grid.getPower(x - 1, y) == 2 || grid.getPower(x + 1, y) == 2) {
-        if (truthy) {
-            CHARS.get("|")(x, y, grid, new_grid);
-        } else {
-            CHARS.get("-")(x, y, grid, new_grid);
-        }
-    } else {
-        if (truthy) {
-            CHARS.get("-")(x, y, grid, new_grid);
-        } else {
-            CHARS.get("|")(x, y, grid, new_grid);
-        }
-    }
+    conditional(x, y, grid, new_grid, signal, falsy);
 });
 
 /// "Tunnel"
 CHARS.set(".", (x, y, grid, new_grid) => {
-    let left = grid.getPower(x - 1, y);
-    let right = grid.getPower(x + 1, y);
-    let top = grid.getPower(x, y - 1);
-    let bottom = grid.getPower(x, y + 1);
-    if (left == 2 || right == 2 || top == 2 || bottom == 2) {
+    let signal = grid.getSignal(x, y);
+    if (!signal) {
+        throw new Error(`No signal at ${x}:${y}: "${grid.getChar(x, y)}"`);
+    }
+
+    let origin = getSignalOrigin(signal, x, y, grid);
+
+    if (!origin) {
+        throw new Error(`Couldn't determine origin of signal at ${x}:${y}!`);
+    }
+
+    if (Math.abs(signal.originX - x) <= 1 && Math.abs(signal.originY - y) <= 1) {
         // Transmit signal
         let x2 = x;
         let y2 = y;
-        if (left == 2) {
+        if (origin === LEFT) {
             while (x2 < grid.width) {
                 x2 += 1;
                 let char = grid.getChar(x2, y);
@@ -377,7 +409,7 @@ CHARS.set(".", (x, y, grid, new_grid) => {
                 if (char === ".") break;
             }
             if (x2 >= grid.width) return true;
-        } else if (right == 2) {
+        } else if (origin === RIGHT) {
             while (x2 >= 0) {
                 x2 -= 1;
                 let char = grid.getChar(x2, y);
@@ -385,7 +417,7 @@ CHARS.set(".", (x, y, grid, new_grid) => {
                 if (char === ".") break;
             }
             if (x2 < 0) return true;
-        } else if (top == 2) {
+        } else if (origin === UP) {
             while (y2 < grid.height) {
                 y2 += 1;
                 let char = grid.getChar(x, y2);
@@ -431,6 +463,7 @@ CHARS.set("\"", (x, y, grid, new_grid) => {
     let signalBelow = grid.getSignal(x, y + 1);
     new_grid.moveSignal(x, y, x, y + 1);
     if (signalBelow) {
+        signalBelow.setOrigin(x, y);
         new_grid.newSignal(x, y, signalBelow);
         return CHARS.get("-")(x, y, grid, new_grid);
     } else {
@@ -481,11 +514,20 @@ CHARS.set("x", (x, y, grid, new_grid) => {
         for (; n < signalBelow.length; n++) signal.push(signalBelow.peek(n));
         signal.variables = signalBelow.variables;
         signal.reverse();
+        signal.setOrigin(x, y);
 
-        new_grid.newSignal(x, y, signal);
         new_grid.setPower(x, y - 1, 2);
         new_grid.setPower(x, y + 1, 2);
-        return CHARS.get("-")(x, y, grid, new_grid);
+
+        // Transmit signal
+        if (grid.hasChar(x - 1, y) && grid.getPower(x - 1, y) == 0) {
+            new_grid.setPower(x - 1, y);
+            new_grid.newSignal(x - 1, y, signal);
+        }
+        if (grid.hasChar(x + 1, y) && grid.getPower(x + 1, y) == 0) {
+            new_grid.setPower(x + 1, y);
+            new_grid.newSignal(x + 1, y, signal);
+        }
     } else {
         if (signalAbove && grid.getPower(x, y - 1) == 2) new_grid.setPower(x, y - 1, 3);
         if (signalBelow && grid.getPower(x, y + 1) == 2) new_grid.setPower(x, y + 1, 3);
@@ -504,6 +546,7 @@ CHARS.set("»", (x, y, grid, new_grid) => {
         let signalLeft = grid.getSignal(x - 1, y) ?? new Signal();
 
         signal = signal.concat(signalLeft);
+        signal.setOrigin(x, y);
         new_grid.removeSignal(x - 1, y);
         new_grid.removeSignal(x, y);
         if (new_grid.getPower(x - 1, y) == 3) new_grid.setPower(x - 1, y, 2);
@@ -527,6 +570,7 @@ CHARS.set("«", (x, y, grid, new_grid) => {
         let signalRight = grid.getSignal(x + 1, y) ?? new Signal();
 
         signal = signalRight.concat(signal);
+        signal.setOrigin(x, y);
         new_grid.removeSignal(x, y);
         if (new_grid.getPower(x + 1, y) == 3) new_grid.setPower(x + 1, y, 2);
 
@@ -636,7 +680,7 @@ CHARS.set("r", (x, y, grid, new_grid) => {
             if (grid.getPower(x, y - 1) === 3) new_grid.setPower(x, y - 1, 2);
             if (grid.getPower(x, y + 1) === 3) new_grid.setPower(x, y + 1, 2);
 
-            let signal = new_grid.getSignal(x, y);
+            let signal = grid.getSignal(x, y);
             if (signal) {
                 signal.push(grid.stdin.getChar());
             }
@@ -671,7 +715,7 @@ CHARS.set("R", (x, y, grid, new_grid) => {
             if (grid.getPower(x, y - 1) === 3) new_grid.setPower(x, y - 1, 2);
             if (grid.getPower(x, y + 1) === 3) new_grid.setPower(x, y + 1, 2);
 
-            let signal = new_grid.getSignal(x, y);
+            let signal = grid.getSignal(x, y);
             if (signal) {
                 signal.push(grid.stdin.getLine());
             }
@@ -698,7 +742,7 @@ CHARS.set("R", (x, y, grid, new_grid) => {
 });
 
 CHARS.set("w", (x, y, grid, new_grid) => {
-    let signal = new_grid.getSignal(x, y);
+    let signal = grid.getSignal(x, y);
 
     if (signal) {
         grid.stdout.write(String(signal.pop()));
@@ -708,7 +752,7 @@ CHARS.set("w", (x, y, grid, new_grid) => {
 });
 
 CHARS.set("W", (x, y, grid, new_grid) => {
-    let signal = new_grid.getSignal(x, y);
+    let signal = grid.getSignal(x, y);
 
     if (signal) {
         grid.stdout.write(String(signal.pop()) + "\n");
@@ -718,7 +762,7 @@ CHARS.set("W", (x, y, grid, new_grid) => {
 });
 
 CHARS.set("d", (x, y, grid, new_grid) => {
-    let signal = new_grid.getSignal(x, y);
+    let signal = grid.getSignal(x, y);
 
     let wait = signal.pop();
     if (wait > 0) {
