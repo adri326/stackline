@@ -604,8 +604,8 @@ Boolean values are encoded as integers: a non-zero value will be considered trut
 | :-------: | :--- | :---------- |
 | `<` | Less than | Pops two values, pushes 1 if `left < right`, pushes 0 otherwise. |
 | `>` | Greater than | Pops two values, pushes 1 if `left > right`, pushes 0 otherwise. |
-| `≤` | Less than | Pops two values, pushes 1 if `left <= right`, pushes 0 otherwise. |
-| `≥` | Less than | Pops two values, pushes 1 if `left >= right`, pushes 0 otherwise. |
+| `≤` | Less than or equal | Pops two values, pushes 1 if `left <= right`, pushes 0 otherwise. |
+| `≥` | Greater than or equal | Pops two values, pushes 1 if `left >= right`, pushes 0 otherwise. |
 | `=` | Equal | Pops two values, pushes 1 if `left === right`, pushes 0 otherwise. |
 | `≠` | Not equal | Pops two values, pushes 1 if `left !== right`, pushes 0 otherwise. |
 

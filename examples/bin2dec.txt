@@ -1,0 +1,18 @@
+>#---------¿-#---p
+|:p1-d3d1% | :oo :
+|:~d2*[4+] |
+^:sp2*sd   | ^
+^----------< Remove temporaries
+|
+|
++#---------------------------------#------<!
+|:p0p1d2a  Initialize the loop     :p"1010"
+|
+>#.       .¿#---p                    ^ Number to convert
+|:p1-d3d1% .:oo :
+|:~d2*[4+]
+|:sp2*sd
+.         ..
+
+Here are two versions of a compact binary to decimal converter. The bottom version was optimized to
+only take 16 ticks per iteration.
