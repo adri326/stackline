@@ -17,7 +17,7 @@ import IO from "./io.js";
 
 const colorActive = chalk.hex("#90FFFF");
 const colorAsleep = chalk.hex("#707070");
-const colorResting = chalk.hex("#262626");
+const colorResting = chalk.hex("#404040");
 const colorIdle = chalk.hex("#5030F3");
 
 // Argument parsing and grid reading
@@ -31,7 +31,7 @@ const argv = yargs(hideBin(process.argv))
 // Simulation-related constants
 
 const CAN_STOP = true;
-const DT = 1000/Math.max(+argv.fps || 60, 60);
+const DT = 1000/Math.max(+argv.fps || 60, 0.01);
 const ITERATIONS_PER_FRAME = Math.max(+argv.mult || 1, 1);
 
 // Grids
