@@ -12,17 +12,12 @@ import Grid from "./grid.js";
 import {step, activeGrid} from "./simulation.js"
 import IO from "./io.js";
 
-// Simulation-related constants
-
-const DT = 1000/30;
-const ITERATIONS_PER_FRAME = 1; // Increase this if you want to run the "brainfuck" example
-const CAN_STOP = true;
 
 // Colors
 
 const colorActive = chalk.hex("#90FFFF");
 const colorAsleep = chalk.hex("#707070");
-const colorResting = chalk.hex("#262626");
+const colorResting = chalk.hex("#404040");
 const colorIdle = chalk.hex("#5030F3");
 
 // Argument parsing and grid reading
@@ -30,8 +25,16 @@ const colorIdle = chalk.hex("#5030F3");
 const argv = yargs(hideBin(process.argv))
     .alias("i", "input")
     .alias("o", "output")
+    .alias("m", "mult")
     .parse();
 
+// Simulation-related constants
+
+const CAN_STOP = true;
+const DT = 1000/Math.max(+argv.fps || 60, 0.01);
+const ITERATIONS_PER_FRAME = Math.max(+argv.mult || 1, 1);
+
+// Grids
 const grid_a = Grid.fromString(argv._[0] ? fs.readFileSync(argv._[0], "utf8") : "");
 const grid_b = grid_a.clone();
 

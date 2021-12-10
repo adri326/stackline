@@ -512,7 +512,10 @@ CHARS.set("x", (x, y, grid, new_grid) => {
         }
         for (; n < signalAbove.length; n++) signal.push(signalAbove.peek(n));
         for (; n < signalBelow.length; n++) signal.push(signalBelow.peek(n));
-        signal.variables = signalBelow.variables;
+        signal.variables = signalAbove.variables;
+        for (let [key, value] of signalBelow.variables) {
+            signal.variables.set(key, value);
+        }
         signal.reverse();
         signal.setOrigin(x, y);
 
@@ -657,7 +660,7 @@ CHARS.set("D", (x, y, grid, new_grid) => {
     let signal = grid.getSignal(x, y);
 
     if (signal) {
-        signal.heap = new Map();
+        signal.variables = new Map();
         new_grid.newSignal(x, y, signal);
     }
 
