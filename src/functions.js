@@ -53,6 +53,7 @@ export function withNumericalInput(x, y, grid, callback) {
         if (grid.getChar(x + 1, y) == "-") {
             str = "-";
             offset = 2;
+            if (!/^[0-9\.]$/.exec(grid.getChar(x + 2, y))) return callback();
         }
         while (/^[0-9\.]$/.exec(grid.getChar(x + offset, y))) {
             str += grid.getChar(x + offset, y);

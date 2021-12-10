@@ -31,7 +31,7 @@ The char defines what the action will be. For instance:
 
 Finally, data travels on the wire and between the cells.
 This data is manipulated by instructions, which use a simple [stack-based](https://esolangs.org/wiki/Stack) [language](./characters.md#instructions).
-Here are some of them:
+Here are some of them, but a full list is available in the [reference sheet](./characters.md#instructions):
 
 - `p`, pushes a number or a string onto the stack. For instance, `p-2.3` pushes `-2.3` and `p"Oh?"` pushes `Oh?`.
 - `d`, duplicates the topmost item from the stack. It can take an optional number parameter to specify the `n`-th element from the top of the stack to pop: `p3d` pushes `3` twice on the stack and `p2p3d1` pushes `3`, `2`, `3`.
@@ -51,6 +51,7 @@ The loop adds one on the stack and sums it with the previous value, it then prin
 More complex programs can be expressed in this language. You can find some in the [examples](./examples/) folder!
 
 A reference sheet of every character used in this language is available at [characters.md](./characters.md).
+We recommend that you have a read of it or that you keep it at hand whenever you're analyzing someone else's code written in Stackline.
 
 ## Installing
 

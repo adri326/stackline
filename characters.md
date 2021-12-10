@@ -21,6 +21,9 @@ Some characters are *Passive*: they will trigger on their own without being trig
 | `v` | Down diode | Transmits the signal to the bottom cell if it has a state of `0`. |
 | `V` (uppercase) | Forcing down diode | Transmits the signal to the bottom cell, *if it has a state other than `2` (resting)*. |
 
+Wires are insulated: if the signal that they receive does not come from where they are connected to, then they will discard it.
+This prevents unwanted activations, see the examples below for that!
+
 **Examples:**
 
 ```
@@ -62,6 +65,16 @@ be duplicated on either side of it. This holds for every cell
 that can duplicate signals.
 ```
 
+```
+!---v
+ v+-<
+ |>-^
+
+Wires are insulated: in this loop, the piece of wire above the "+" will discard
+any signal coming from below or above it, including the signal that will come from
+the "+". Diodes ignore this restriction.
+```
+
 ### Specials
 
 | Character | Name | Description |
@@ -70,7 +83,7 @@ that can duplicate signals.
 | `#` | Hold | Sends the signal down and waits, by settings itself to state `3` (idle), and any horizontally adjacent cell that has state `2` (resting) to state `3`. Once it is reactivated (if the bottom cell has a state of `2` or one of the horizontally adjacent cells has state `3`), unlocks adjacent cells and sends the result signal horizontally. |
 | `:` | Execute | Executes the [instructions](#instructions) to its right with the current signal, then sends down the altered signal and becomes state `3` (idle) if the character below it is a `:`. Otherwise, sends the signal up until it finds a non-`:` character, setting every `:` (including itself) to state `2` (resting). *Also used by `p`* |
 | `p` | Debug print | Prints the first few elements of the stack into the simulation. Does not check whether or not it will write over important pieces of circuitry, so use at your own risk! Only prints to the right of `:` that are placed right below it. Can be followed by a number that specifies the precision of the numerical values. |
-| `.` | Tunnel | Sends the signal to the next `.` in the same direction as it came. If a wall (`=`) is encountered, stops transmitting the signal. Upon receival, acts like a `+`. |
+| `.` | Tunnel | Sends the signal to the next `.` in the same direction as it came. If a wall (`$`) is encountered, stops transmitting the signal. Upon receival, acts like a `+`. |
 | `d` | Delay | Pops a value from the stack; if it is a positive number, wait that amount of ticks. Then, it acts like a `+`. If the value isn't a number, it gets pushed back on the stack. |
 | `H` | Halt | Stops the simulation, can be disabled in the simulation settings. |
 
@@ -123,7 +136,7 @@ A simple counter, starting at 1. Has a period of 12, but can be made more compac
 
 ```
 !---v      Use "." to jump over other pieces of circuitry.
-    .      Be careful to not leak your signal to other wires.
+    .      The signal will come out of the "." in the same direction as it came.
 
 !------v
        |
@@ -237,7 +250,7 @@ default value of 0 if the variable didn't exist.
 | `c` | Clear | Clears a signal, transmitting a brand new signal instead. |
 | `C` (uppercase) | Clear stack | Clears the stack from a signal, transmitting a new signal with an empty stack but preserving the heap. |
 | `D` (uppercase) | Clear heap | Clears the heap from a signal, transmitting a new signal with an empty heap but preserving the stack. |
-| `k` | Kill | When receiving a signal, sets every cell in the same direction as the signal to state `2` (resting), until it either reaches the end of the network or a wall (`=`). |
+| `k` | Kill | When receiving a signal, sets every cell in the same direction as the signal to state `2` (resting), until it either reaches the end of the network or a wall (`$`). |
 
 **Examples:**
 
@@ -277,7 +290,7 @@ both stacks.
 ```
 
 ```
- ==
+ $$
 !>+-----+
  ^<     |
         |

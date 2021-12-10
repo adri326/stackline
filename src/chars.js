@@ -6,6 +6,8 @@ import Signal from "./signal.js";
 const CHARS = new Map();
 export default CHARS;
 
+export const WALL_CHAR = "$";
+
 // TODO: avoid sending the signal to an insulated cell?
 
 CHARS.set("-", (x, y, grid, new_grid) => {
@@ -405,7 +407,7 @@ CHARS.set(".", (x, y, grid, new_grid) => {
             while (x2 < grid.width) {
                 x2 += 1;
                 let char = grid.getChar(x2, y);
-                if (char === "=") return;
+                if (char === WALL_CHAR) return;
                 if (char === ".") break;
             }
             if (x2 >= grid.width) return true;
@@ -413,7 +415,7 @@ CHARS.set(".", (x, y, grid, new_grid) => {
             while (x2 >= 0) {
                 x2 -= 1;
                 let char = grid.getChar(x2, y);
-                if (char === "=") return;
+                if (char === WALL_CHAR) return;
                 if (char === ".") break;
             }
             if (x2 < 0) return true;
@@ -421,7 +423,7 @@ CHARS.set(".", (x, y, grid, new_grid) => {
             while (y2 < grid.height) {
                 y2 += 1;
                 let char = grid.getChar(x, y2);
-                if (char === "=") return;
+                if (char === WALL_CHAR) return;
                 if (char === ".") break;
             }
             if (y2 >= grid.height) return true;
@@ -429,7 +431,7 @@ CHARS.set(".", (x, y, grid, new_grid) => {
             while (y2 >= 0) {
                 y2 -= 1;
                 let char = grid.getChar(x, y2);
-                if (char === "=") return;
+                if (char === WALL_CHAR) return;
                 if (char === ".") break;
             }
             if (y2 < 0) return true;
@@ -602,7 +604,7 @@ CHARS.set("k", (x, y, grid, new_grid) => {
     if (grid.hasChar(x - 1, y) && grid.getPower(x - 1, y) == 2) {
         for (let n = 1; x + n < grid.width; n++) {
             if (grid.hasChar(x + n, y)) {
-                if (grid.getChar(x + n, y) == "=") break;
+                if (grid.getChar(x + n, y) == WALL_CHAR) break;
                 new_grid.setPower(x + n, y, 2);
             }
         }
@@ -611,7 +613,7 @@ CHARS.set("k", (x, y, grid, new_grid) => {
     if (grid.hasChar(x + 1, y) && grid.getPower(x + 1, y) == 2) {
         for (let n = 1; x - n >= 0; n++) {
             if (grid.hasChar(x - n, y)) {
-                if (grid.getChar(x - n, y) == "=") break;
+                if (grid.getChar(x - n, y) == WALL_CHAR) break;
                 new_grid.setPower(x - n, y, 2);
             }
         }
@@ -620,7 +622,7 @@ CHARS.set("k", (x, y, grid, new_grid) => {
     if (grid.hasChar(x, y - 1) && grid.getPower(x, y - 1) == 2) {
         for (let n = 1; y + n < grid.height; n++) {
             if (grid.hasChar(x, y + n)) {
-                if (grid.getChar(x, y + n) == "=") break;
+                if (grid.getChar(x, y + n) == WALL_CHAR) break;
                 new_grid.setPower(x, y + n, 2);
             }
         }
@@ -629,7 +631,7 @@ CHARS.set("k", (x, y, grid, new_grid) => {
     if (grid.hasChar(x, y + 1) && grid.getPower(x, y + 1) == 2) {
         for (let n = 1; y - n >= 0; n++) {
             if (grid.hasChar(x, y - n)) {
-                if (grid.getChar(x, y - n) == "=") break;
+                if (grid.getChar(x, y - n) == WALL_CHAR) break;
                 new_grid.setPower(x, y - n, 2);
             }
         }
